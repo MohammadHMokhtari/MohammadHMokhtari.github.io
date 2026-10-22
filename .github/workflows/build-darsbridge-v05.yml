@@ -1,4 +1,4 @@
-name: Build and test DarsBridge 0.5
+name: Snowflake emulator Android 16 diagnostic
 on:
   push:
     branches: [darsbridge-snowflake-diagnostics]
@@ -37,7 +37,7 @@ jobs:
       - name: Android 15 emulator smoke tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 36
           target: google_apis
           arch: x86_64
           profile: pixel_2
