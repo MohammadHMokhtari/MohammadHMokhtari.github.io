@@ -1,15 +1,17 @@
 package com.darsbridge.app;
-
-/** Pure routing decision, independently testable; no silent direct fallback. */
+/** No silent direct fallback from an automatic route. */
 public final class ConnectionPolicy {
-    public enum Mode { AUTO, SYSTEM, LOCAL }
-    public enum Route { BLOCKED, SYSTEM, SOCKS }
+    public enum Mode { AUTO, SYSTEM, LOCAL, EMBEDDED }
+    public enum Route { BLOCKED, SYSTEM, SOCKS, INTERNAL }
     private ConnectionPolicy() {}
-    public static Route choose(Mode mode, boolean hasVpn, boolean hasSocks, boolean proxySupported) {
+    public static Route choose(Mode mode, boolean hasVpn, boolean hasLocalSocks,
+                               boolean proxySupported, boolean internalReady) {
         if (mode == Mode.SYSTEM) return Route.SYSTEM;
-        if (mode == Mode.LOCAL) return hasSocks && proxySupported ? Route.SOCKS : Route.BLOCKED;
+        if (mode == Mode.LOCAL) return hasLocalSocks && proxySupported ? Route.SOCKS : Route.BLOCKED;
+        if (mode == Mode.EMBEDDED) return internalReady && proxySupported ? Route.INTERNAL : Route.BLOCKED;
         if (hasVpn) return Route.SYSTEM;
-        return hasSocks && proxySupported ? Route.SOCKS : Route.BLOCKED;
+        if (internalReady && proxySupported) return Route.INTERNAL;
+        return hasLocalSocks && proxySupported ? Route.SOCKS : Route.BLOCKED;
     }
     public static Mode parse(String name) {
         try { return Mode.valueOf(name); } catch (Exception e) { return Mode.AUTO; }
