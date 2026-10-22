@@ -1,0 +1,79 @@
+name: Build and test DarsBridge 0.5
+on:
+  push:
+    branches: [darsbridge-v05]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: darsbridge-v05-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '24'
+      - uses: android-actions/setup-android@v4
+        with:
+          log-accepted-android-sdk-licenses: false
+      - name: Install SDK
+        run: sdkmanager --channel=3 'platforms;android-37.2' 'build-tools;36.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+      - name: Unit tests, lint and APK
+        working-directory: darsbridge-v05
+        run: gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --no-daemon --stacktrace
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android 15 emulator smoke tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 2048M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: |
+            gradle -p darsbridge-v05 :app:connectedDebugAndroidTest --no-daemon --stacktrace
+            mkdir -p build-output
+            adb install -r darsbridge-v05/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -W -n com.darsbridge.app.v05/com.darsbridge.app.MainActivity
+            sleep 2
+            adb exec-out screencap -p > build-output/home.png
+      - name: Package verified output
+        run: |
+          mkdir -p build-output
+          cp darsbridge-v05/app/build/outputs/apk/debug/app-debug.apk build-output/DarsBridge-0.5.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build-output/DarsBridge-0.5.apk
+          cd build-output && sha256sum DarsBridge-0.5.apk > SHA256SUMS.txt
+      - name: Upload tested APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarsBridge-0.5-APK
+          path: |
+            build-output/DarsBridge-0.5.apk
+            build-output/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload test reports and screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarsBridge-0.5-TestReports
+          path: |
+            darsbridge-v05/app/build/reports/
+            darsbridge-v05/app/build/test-results/
+            darsbridge-v05/app/build/outputs/androidTest-results/
+            build-output/home.png
+          retention-days: 14
