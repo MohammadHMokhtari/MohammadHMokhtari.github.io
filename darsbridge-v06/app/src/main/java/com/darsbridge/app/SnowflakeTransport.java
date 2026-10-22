@@ -25,30 +25,62 @@ final class SnowflakeTransport {
         for (String token : line.split(" ")) if (token.startsWith(key+"=")) return token.substring(key.length()+1);
         return "";
     }
-    synchronized int start(Context context) throws Exception {
+    /** Code and cause stay local; this app does not upload diagnostic data. */
+    static final class SetupFailure extends Exception {
+        final String step;
+        SetupFailure(String step, Throwable cause) { super(step+": "+cause.getClass().getSimpleName(),cause); this.step=step; }
+        String userMessage() {
+            Throwable base=getCause();
+            if(base==null)return "مرحله "+step+" ناموفق بود.";
+            String extra=base.getMessage();
+            // Avoid displaying long internal paths or URLs from third-party native errors.
+            if(extra!=null && (extra.contains("/") || extra.contains("://")))extra="[جزئیات مسیر داخلی پنهان شد]";
+            if(extra==null)extra="";
+            extra=extra.replace("\n"," ").replace("\r"," ");
+            if(extra.length()>110)extra=extra.substring(0,110);
+            return "کد خطا: "+step+"\\nنوع: "+base.getClass().getSimpleName()+"\\nشرح: "+extra;
+        }
+    }
+
+    synchronized int start(Context context) throws SetupFailure {
         if (controller != null) {
-            int active=(int)controller.port(IPtProxy.Snowflake);
-            if(active>0)return active;
+            try {
+                int active=(int)controller.port(IPtProxy.Snowflake);
+                if(active>0)return active;
+            }catch(Exception | LinkageError ignored){}
             stop();
         }
-        File dir=new File(context.getCacheDir(),"snowflake_state");
-        if(!dir.exists() && !dir.mkdirs())throw new IllegalStateException("Snowflake state folder failed");
-        Controller c = new Controller(dir.getAbsolutePath(), false,false,"ERROR",new OnTransportEvents() {
-            @Override public void connected(String name){}
-            @Override public void error(String name, Exception exception){}
-            @Override public void stopped(String name, Exception exception){}
-        });
-        c.setSnowflakeIceServers(option(BRIDGES[0],"ice"));
-        c.setSnowflakeBrokerUrl(option(BRIDGES[0],"url"));
-        c.setSnowflakeFrontDomains(option(BRIDGES[0],"fronts"));
-        c.setSnowflakeAmpCacheUrl("");
-        c.setSnowflakeSqsUrl("");
-        c.setSnowflakeSqsCreds("");
-        c.start(IPtProxy.Snowflake,null);
-        int port=(int)c.port(IPtProxy.Snowflake);
-        if(port<1 || port>65535){c.stop(IPtProxy.Snowflake);throw new IllegalStateException("Snowflake local port missing");}
-        controller=c;
-        return port;
+        String step="STORAGE";
+        Controller c=null;
+        try {
+            File dir=new File(context.getCacheDir(),"snowflake_state");
+            if(!dir.exists() && !dir.mkdirs())throw new IllegalStateException("Snowflake state folder failed");
+
+            step="GO_BINDINGS";
+            c=new Controller(dir.getAbsolutePath(),false,false,"ERROR",new OnTransportEvents() {
+                @Override public void connected(String name){}
+                @Override public void error(String name, Exception exception){}
+                @Override public void stopped(String name, Exception exception){}
+            });
+            step="SNOWFLAKE_OPTIONS";
+            c.setSnowflakeIceServers(option(BRIDGES[0],"ice"));
+            c.setSnowflakeBrokerUrl(option(BRIDGES[0],"url"));
+            c.setSnowflakeFrontDomains(option(BRIDGES[0],"fronts"));
+            c.setSnowflakeAmpCacheUrl("");
+            c.setSnowflakeSqsUrl("");
+            c.setSnowflakeSqsCreds("");
+
+            step="SNOWFLAKE_START";
+            c.start(IPtProxy.Snowflake,null);
+            step="SOCKS_LISTENER";
+            int port=(int)c.port(IPtProxy.Snowflake);
+            if(port<1 || port>65535)throw new IllegalStateException("Snowflake local port missing");
+            controller=c;
+            return port;
+        }catch(Exception | LinkageError err){
+            if(c!=null)try{c.stop(IPtProxy.Snowflake);}catch(Exception | LinkageError ignored){}
+            throw new SetupFailure(step,err);
+        }
     }
 
     static void configureTor(Context context,int clientPort) throws Exception {
