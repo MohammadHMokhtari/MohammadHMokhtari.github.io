@@ -101,12 +101,17 @@ final class EmbeddedTor {
         final int ticket=++attempt;
         observer.changed(false,withSnowflake?"در حال آماده‌سازی پل Snowflake داخلی…":"در حال راه‌اندازی Tor مستقیم…");
         worker.execute(()->{
+            String stage="STARTING";
             try {
                 if(withSnowflake) {
+                    stage="SNOWFLAKE_CLIENT";
                     int ptPort=bridge.start(activity);
+                    stage="WRITE_TOR_CONFIG";
                     SnowflakeTransport.configureTor(activity,ptPort);
                 } else {
+                    stage="STOP_SNOWFLAKE";
                     bridge.stop();
+                    stage="WRITE_DIRECT_CONFIG";
                     SnowflakeTransport.configureDirect(activity);
                 }
                 ui.post(()->{
@@ -129,12 +134,25 @@ final class EmbeddedTor {
                     }
                 });
             }catch(Exception | LinkageError e){
+                String label=e instanceof SnowflakeTransport.SetupFailure
+                    ? ((SnowflakeTransport.SetupFailure)e).userMessage()
+                    : "کد خطا: "+stage+"\\nنوع: "+e.getClass().getSimpleName()
+                        +"\\nشرح: "+safeMessage(e);
+                android.util.Log.e("DarsBridgeTransport","Transport setup failure at "+stage,e);
                 ui.post(()->{
                     if(!destroyed && starting && ticket==attempt)
-                        fail("آماده‌سازی پل Snowflake روی گوشی ناموفق بود. برای اتصال از Orbot استفاده کنید.");
+                        fail("DIAG\\n"+label);
                 });
             }
         });
+    }
+
+    private static String safeMessage(Throwable error) {
+        String info=error.getMessage();
+        if(info==null)return "";
+        if(info.contains("/") || info.contains("://"))return "[مسیر داخلی یا نشانی حذف شد]";
+        info=info.replace("\\r"," ").replace("\\n"," ");
+        return info.length()>130?info.substring(0,130):info;
     }
 
     private void pollReady(){
