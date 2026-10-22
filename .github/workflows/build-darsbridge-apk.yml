@@ -19,6 +19,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v4
+        with:
+          log-accepted-android-sdk-licenses: false
       - name: Install SDK
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
@@ -45,7 +47,10 @@ jobs:
           script: |
             gradle -p darsbridge-v03 :app:connectedDebugAndroidTest --no-daemon --stacktrace
             mkdir -p build-output
-            adb pull /sdcard/Android/data/com.darsbridge.app.v03/files/home.png build-output/home.png
+            adb install -r darsbridge-v03/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -W -n com.darsbridge.app.v03/com.darsbridge.app.MainActivity
+            sleep 2
+            adb exec-out screencap -p > build-output/home.png
       - name: Package verified output
         run: |
           mkdir -p build-output
