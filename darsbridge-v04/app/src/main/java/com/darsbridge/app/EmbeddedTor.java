@@ -7,11 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import org.torproject.jni.TorService;
+import androidx.core.content.ContextCompat;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -93,9 +93,7 @@ final class EmbeddedTor {
             IntentFilter filter=new IntentFilter();
             filter.addAction(TorService.ACTION_STATUS);
             filter.addAction(TorService.ACTION_ERROR);
-            if (Build.VERSION.SDK_INT>=33)
-                activity.registerReceiver(receiver,filter,Context.RECEIVER_NOT_EXPORTED);
-            else activity.registerReceiver(receiver,filter);
+            ContextCompat.registerReceiver(activity,receiver,filter,ContextCompat.RECEIVER_NOT_EXPORTED);
             registered=true;
             bound=activity.bindService(new Intent(activity,TorService.class),
                 connection,Context.BIND_AUTO_CREATE);
