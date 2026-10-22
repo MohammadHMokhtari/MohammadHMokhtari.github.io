@@ -20,6 +20,7 @@ android {
 }
 dependencies {
     implementation("androidx.webkit:webkit:1.14.0")
+    implementation("androidx.core:core:1.16.0")
     implementation("info.guardianproject:tor-android:0.4.9.14")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.6.2")
