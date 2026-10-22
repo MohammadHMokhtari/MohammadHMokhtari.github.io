@@ -1,7 +1,7 @@
 plugins { id("com.android.application") }
 android {
     namespace = "com.darsbridge.app"
-    compileSdk = 35
+    compileSdk = 37
     defaultConfig {
         // Separate ID preserves the user's working 0.2 install and its saved pages.
         applicationId = "com.darsbridge.app.v04"
