@@ -35,6 +35,9 @@ final class EmbeddedTor {
     private boolean bound = false, registered = false, checking = false, destroyed = false;
     private int attempt = 0;
     private TorService service;
+    private final SnowflakeTransport bridge=new SnowflakeTransport();
+    private volatile boolean snowflakeMode=false;
+    private int lastProgress=-1;
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override public void onReceive(Context ctx, Intent intent) {
@@ -49,7 +52,7 @@ final class EmbeddedTor {
             if (TorService.STATUS_STOPPING.equals(state) || TorService.STATUS_OFF.equals(state)) {
                 fail("موتور Tor داخلی متوقف شد.");
             } else if (TorService.STATUS_STARTING.equals(state)) {
-                observer.changed(false,"در حال اتصال مستقیم به شبکه Tor…");
+                observer.changed(false,snowflakeMode?"در حال برقراری مدار Tor با پل Snowflake…":"در حال اتصال مستقیم به شبکه Tor…");
             } else if (TorService.STATUS_ON.equals(state)) {
                 pollReady();
             }
@@ -82,29 +85,56 @@ final class EmbeddedTor {
     boolean isStarting(){ return starting; }
     boolean isReady(){ return ready; }
     int port(){ return ready ? port : -1; }
+    boolean isSnowflake(){return snowflakeMode;}
 
-    void start(){
-        if (destroyed || starting) return;
-        starting=true;
-        ready=false;port=-1;
-        final int ticket=++attempt;
-        observer.changed(false,"در حال راه‌اندازی Tor داخلی…");
-        try {
-            IntentFilter filter=new IntentFilter();
-            filter.addAction(TorService.ACTION_STATUS);
-            filter.addAction(TorService.ACTION_ERROR);
-            ContextCompat.registerReceiver(activity,receiver,filter,ContextCompat.RECEIVER_NOT_EXPORTED);
-            registered=true;
-            bound=activity.bindService(new Intent(activity,TorService.class),
-                connection,Context.BIND_AUTO_CREATE);
-            if(!bound){fail("سرویس Tor داخلی اجرا نشد.");return;}
-            ui.postDelayed(()->{
-                if(!destroyed && starting && !ready && ticket==attempt)
-                    fail("Tor مستقیم در این شبکه متصل نشد؛ برای پل Snowflake یا obfs4 از Orbot استفاده کنید.");
-            },75000);
-        }catch(RuntimeException | LinkageError e){
-            fail("راه‌اندازی Tor داخلی روی این نسخه اندروید ممکن نشد.");
+    void start(boolean withSnowflake){
+        if (destroyed) return;
+        if (starting) {
+            if(snowflakeMode==withSnowflake)return;
+            stop();
+            ui.postDelayed(()->{if(!destroyed)start(withSnowflake);},1200);
+            return;
         }
+        snowflakeMode=withSnowflake;
+        starting=true;
+        ready=false;port=-1;lastProgress=-1;
+        final int ticket=++attempt;
+        observer.changed(false,withSnowflake?"در حال آماده‌سازی پل Snowflake داخلی…":"در حال راه‌اندازی Tor مستقیم…");
+        worker.execute(()->{
+            try {
+                if(withSnowflake) {
+                    int ptPort=bridge.start(activity);
+                    SnowflakeTransport.configureTor(activity,ptPort);
+                } else {
+                    bridge.stop();
+                    SnowflakeTransport.configureDirect(activity);
+                }
+                ui.post(()->{
+                    if(destroyed || !starting || ticket!=attempt)return;
+                    try {
+                        IntentFilter filter=new IntentFilter();
+                        filter.addAction(TorService.ACTION_STATUS);
+                        filter.addAction(TorService.ACTION_ERROR);
+                        ContextCompat.registerReceiver(activity,receiver,filter,ContextCompat.RECEIVER_NOT_EXPORTED);
+                        registered=true;
+                        bound=activity.bindService(new Intent(activity,TorService.class),
+                            connection,Context.BIND_AUTO_CREATE);
+                        if(!bound){fail("سرویس Tor داخلی اجرا نشد.");return;}
+                        ui.postDelayed(()->{
+                            if(!destroyed && starting && !ready && ticket==attempt)
+                                fail(withSnowflake?"Snowflake هم در این شبکه به مدار Tor متصل نشد؛ Orbot با Bridge دیگر را امتحان کنید.":"Tor مستقیم متصل نشد؛ Snowflake داخلی را امتحان کنید.");
+                        },115000);
+                    }catch(RuntimeException | LinkageError e){
+                        fail("سرویس Tor داخلی قابل راه‌اندازی نیست.");
+                    }
+                });
+            }catch(Exception | LinkageError e){
+                ui.post(()->{
+                    if(!destroyed && starting && ticket==attempt)
+                        fail("آماده‌سازی پل Snowflake روی گوشی ناموفق بود. برای اتصال از Orbot استفاده کنید.");
+                });
+            }
+        });
     }
 
     private void pollReady(){
@@ -128,9 +158,13 @@ final class EmbeddedTor {
                 checking=false;
                 if(!starting || destroyed || ticket!=attempt)return;
                 if(ok){
+                    lastProgress=100;
                     ready=true;port=detectedPort;
                     observer.changed(true,"Tor داخلی متصل است؛ خروجی را با آزمایش Tor بررسی کنید.");
-                }else ui.postDelayed(this::pollReady,1650);
+                }else {
+                    if(lastProgress<0){lastProgress=0;observer.changed(false,snowflakeMode?"Snowflake روشن است؛ در حال ایجاد مدار Tor…":"Tor مستقیم در حال بوت‌استرپ…");}
+                    ui.postDelayed(this::pollReady,1650);
+                }
             });
         });
     }
@@ -152,6 +186,8 @@ final class EmbeddedTor {
     void stop(){
         ++attempt;
         starting=false;ready=false;port=-1;service=null;
+        // Disconnect the transport before allowing a different Tor routing configuration.
+        try{bridge.stop();}catch(RuntimeException | LinkageError ignored){}
         if(bound){
             try{activity.unbindService(connection);}catch(IllegalArgumentException ignored){}
             bound=false;
