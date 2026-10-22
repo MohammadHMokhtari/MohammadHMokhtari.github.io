@@ -1,12 +1,12 @@
 name: Build and test DarsBridge 0.5
 on:
   push:
-    branches: [darsbridge-v05]
+    branches: [darsbridge-snowflake-diagnostics]
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: darsbridge-v05-${{ github.ref }}
+  group: darsbridge-snowflake-diag-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
