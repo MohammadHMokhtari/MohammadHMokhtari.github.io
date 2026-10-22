@@ -11,6 +11,9 @@ public class ConnectionPolicyTest {
     @Test public void autoNeedsProxySupport(){assertEquals(Route.BLOCKED,choose(Mode.AUTO,false,true,false,true));}
     @Test public void localCannotUseInternal(){assertEquals(Route.BLOCKED,choose(Mode.LOCAL,false,false,true,true));}
     @Test public void localRequiresProxy(){assertEquals(Route.BLOCKED,choose(Mode.LOCAL,true,true,false,true));}
+    @Test public void snowflakeExplicitNoDirectFallback(){assertEquals(Route.BLOCKED,choose(Mode.SNOWFLAKE,true,true,true,false));}
+    @Test public void snowflakeOnlyReadyInternal(){assertEquals(Route.INTERNAL,choose(Mode.SNOWFLAKE,false,false,true,true));}
+    @Test public void snowflakeNeedsProxyOverride(){assertEquals(Route.BLOCKED,choose(Mode.SNOWFLAKE,false,true,false,true));}
     @Test public void embeddedCannotUseExternal(){assertEquals(Route.BLOCKED,choose(Mode.EMBEDDED,true,true,true,false));}
     @Test public void embeddedNeedsProxy(){assertEquals(Route.BLOCKED,choose(Mode.EMBEDDED,false,true,false,true));}
     @Test public void embeddedReady(){assertEquals(Route.INTERNAL,choose(Mode.EMBEDDED,false,false,true,true));}
