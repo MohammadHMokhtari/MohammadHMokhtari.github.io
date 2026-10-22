@@ -51,38 +51,15 @@ jobs:
             adb shell am start -W -n com.darsbridge.app.v05/com.darsbridge.app.MainActivity
             sleep 2
             adb exec-out screencap -p > build-output/home.png
-      - name: Build smaller ARM64-only APK for Samsung
+      - name: Build phone-only ARM64 APK
         working-directory: darsbridge-v05
         run: gradle :app:assembleDebug -PphoneAbi=arm64-v8a --no-daemon --stacktrace
       - name: Package verified output
         run: |
           mkdir -p build-output
           cp darsbridge-v05/app/build/outputs/apk/debug/app-debug.apk build-output/DarsBridge-0.5.apk
-          unzip -Z1 build-output/DarsBridge-0.5.apk | grep -q '^lib/arm64-v8a/libtor.so
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build-output/DarsBridge-0.5.apk
-          cd build-output && sha256sum DarsBridge-0.5.apk > SHA256SUMS.txt
-      - name: Upload tested APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: DarsBridge-0.5-APK
-          path: |
-            build-output/DarsBridge-0.5.apk
-            build-output/SHA256SUMS.txt
-          if-no-files-found: error
-          retention-days: 14
-      - name: Upload test reports and screenshot
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: DarsBridge-0.5-TestReports
-          path: |
-            darsbridge-v05/app/build/reports/
-            darsbridge-v05/app/build/test-results/
-            darsbridge-v05/app/build/outputs/androidTest-results/
-            build-output/home.png
-          retention-days: 14
-
-          if unzip -Z1 build-output/DarsBridge-0.5.apk | grep -Eq '^lib/(armeabi-v7a|x86|x86_64)/'; then echo 'Unexpected non-arm64 native libs'; exit 1; fi
+          unzip -Z1 build-output/DarsBridge-0.5.apk | grep -q '^lib/arm64-v8a/libtor.so$'
+          if unzip -Z1 build-output/DarsBridge-0.5.apk | grep -Eq '^lib/(armeabi-v7a|x86|x86_64)/'; then echo 'Incorrect ABI packaging'; exit 1; fi
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build-output/DarsBridge-0.5.apk
           cd build-output && sha256sum DarsBridge-0.5.apk > SHA256SUMS.txt
       - name: Upload tested APK
