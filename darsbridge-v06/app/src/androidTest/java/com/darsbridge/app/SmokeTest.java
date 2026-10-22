@@ -30,6 +30,26 @@ public class SmokeTest {
             assertTrue(device.takeScreenshot(shot));
         }
     }
+    @Test public void snowflakeNativeLibraryStartsLocalSocksAndWritesTorrc() throws Exception {
+        android.content.Context app=InstrumentationRegistry.getInstrumentation().getTargetContext();
+        SnowflakeTransport transport=new SnowflakeTransport();
+        try {
+            int port=transport.start(app);
+            android.util.Log.i("DarsBridgeDiag","Snowflake local SOCKS listener started on port "+port);
+            assertTrue("Native Snowflake listener must open a nonzero SOCKS port",port>0&&port<65536);
+            SnowflakeTransport.configureTor(app,port);
+            java.io.File file=org.torproject.jni.TorService.getTorrc(app);
+            assertTrue("Tor config file missing after Snowflake initialization",file.isFile());
+            String config=new String(java.nio.file.Files.readAllBytes(file.toPath()),java.nio.charset.StandardCharsets.UTF_8);
+            assertTrue("Bridge not configured",config.contains("UseBridges 1"));
+            assertTrue("Client transport port not configured",config.contains("snowflake socks5 127.0.0.1:"+port));
+        }catch(Throwable ex){
+            android.util.Log.e("DarsBridgeDiag","SNOWFLAKE_PREP_FAILED: "+ex.getClass().getName()+": "+ex.getMessage(),ex);
+            throw new AssertionError("Snowflake preparation failed: "+ex.getClass().getSimpleName()+": "+ex.getMessage(),ex);
+        }finally{
+            transport.stop();
+        }
+    }
     @Test public void offlineStoreRoundTripAndDeduplication() throws Exception {
         PageStore store=new PageStore(InstrumentationRegistry.getInstrumentation().getTargetContext());
         String url="https://example.org/offline-test";
