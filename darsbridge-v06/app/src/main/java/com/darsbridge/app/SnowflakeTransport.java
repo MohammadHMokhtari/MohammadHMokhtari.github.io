@@ -38,7 +38,7 @@ final class SnowflakeTransport {
             if(extra==null)extra="";
             extra=extra.replace("\n"," ").replace("\r"," ");
             if(extra.length()>110)extra=extra.substring(0,110);
-            return "کد خطا: "+step+"\\nنوع: "+base.getClass().getSimpleName()+"\\nشرح: "+extra;
+            return "کد خطا: "+step+"\nنوع: "+base.getClass().getSimpleName()+"\nشرح: "+extra;
         }
     }
 
