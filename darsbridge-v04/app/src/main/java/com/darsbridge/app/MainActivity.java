@@ -56,6 +56,9 @@ public class MainActivity extends Activity {
     private Button modeButton;
     private ProgressBar progress;
     private PageStore store;
+    private EmbeddedTor embedded;
+    private Runnable waitingForEmbedded;
+    private String embeddedMessage="Tor داخلی هنوز راه‌اندازی نشده";
     private ConnectionPolicy.Mode mode;
     private ConnectionPolicy.Route route=ConnectionPolicy.Route.BLOCKED;
     private ConnectivityManager connectivity;
@@ -71,6 +74,7 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         store=new PageStore(this);
+        embedded=new EmbeddedTor(this,(ready,message)->onEmbeddedEvent(ready,message));
         connectivity=(ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
         mode=ConnectionPolicy.parse(prefs().getString("mode","AUTO"));
         socksPort=prefs().getInt("port",9050);
@@ -86,7 +90,7 @@ public class MainActivity extends Activity {
             if(shared!=null) address.setText(shared.trim());
         }
     }
-    private SharedPreferences prefs(){return getSharedPreferences("darsbridge03",MODE_PRIVATE);}
+    private SharedPreferences prefs(){return getSharedPreferences("darsbridge04",MODE_PRIVATE);}
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private TextView text(String s,int size,int color){
         TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);
@@ -113,7 +117,7 @@ public class MainActivity extends Activity {
             }else shell.setPadding(dp(12),insets.getSystemWindowInsetTop(),dp(12),insets.getSystemWindowInsetBottom());
             return insets;
         });
-        TextView title=text("درس‌گذر ۰.۳",22,INK);title.setTypeface(null,Typeface.BOLD);
+        TextView title=text("درس‌گذر ۰.۴",22,INK);title.setTypeface(null,Typeface.BOLD);
         title.setPadding(dp(4),dp(12),dp(4),dp(6));shell.addView(title);
         LinearLayout bar=new LinearLayout(this);bar.setGravity(Gravity.CENTER_VERTICAL);shell.addView(bar);
         address=new EditText(this);address.setTag("address");address.setHint("آدرس سایت، مثلاً youtube.com");
@@ -140,12 +144,13 @@ public class MainActivity extends Activity {
         home=new LinearLayout(this);home.setOrientation(LinearLayout.VERTICAL);home.setPadding(dp(16),dp(18),dp(16),dp(18));
         scroll.addView(home);scroll.setTag("home");pageArea.addView(scroll,new FrameLayout.LayoutParams(-1,-1));
         TextView hello=text("راه کوتاه‌تر به یادگیری",24,INK);hello.setTypeface(null,Typeface.BOLD);home.addView(hello);
-        home.addView(text("Orbot را وصل نگه دارید. حالت هوشمند مسیر VPN سیستم یا پراکسی محلی را انتخاب می‌کند؛ بدون این مسیرها خودکار سراغ اینترنت مستقیم نمی‌رود.",15,MUTED));
+        home.addView(text("مسیر هوشمند از VPN، سپس Tor داخلیِ آماده یا Orbot استفاده می‌کند. اگر هیچ‌کدام آماده نباشد، Tor داخلی را امتحان می‌کند؛ هرگز خودکار به اینترنت مستقیم برنمی‌گردد.",15,MUTED));
         home.addView(button("باز کردن YouTube",v->navigate("https://m.youtube.com/")));
-        home.addView(button("باز کردن Orbot",v->openOrbot()));
+        home.addView(button("Tor داخلی، بدون Orbot (آزمایشی)",v->useEmbedded()));
+        home.addView(button("Orbot با پل‌های ضدسانسور",v->openOrbot()));
         home.addView(button("کتابخانه آفلاین",v->showLibrary()));
         home.addView(button("نشانک‌ها",v->showBookmarks()));
-        home.addView(text("ذخیره آفلاین فقط برای متن است، نه ویدئو. این برنامه جایگزین محافظت‌های Tor Browser نیست و هنگام قطع کامل مسیرهای خارجی اتصال تازه ایجاد نمی‌کند.",13,MUTED));
+        home.addView(text("Tor داخلی فعلاً فقط اتصال مستقیم به Tor دارد؛ در شبکه‌های سخت‌گیر ممکن است Orbot با Bridge لازم شود. هیچ‌کدام هنگام قطع کامل مسیرهای خارجی اینترنت تازه ایجاد نمی‌کنند. ذخیره آفلاین صرفاً متن است.",13,MUTED));
         LinearLayout nav=new LinearLayout(this);shell.addView(nav);
         nav.addView(button("برگشت",v->{if(web.canGoBack())history(-1);else showHome();}),new LinearLayout.LayoutParams(0,dp(48),1));
         nav.addView(button("جلو",v->history(1)),new LinearLayout.LayoutParams(0,dp(48),1));
@@ -235,14 +240,15 @@ public class MainActivity extends Activity {
         if(!alive)return;
         String key=networkIdentity();if(key.equals(networkKey))return;networkKey=key;
         verification="";verifiedAt=0;stopProbe();
-        if(mode==ConnectionPolicy.Mode.AUTO && route==ConnectionPolicy.Route.SYSTEM && !hasVpn()){
-            pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;detail("VPN سیستم قطع یا عوض شد؛ بارگذاری متوقف است. دوباره اتصال را بررسی کنید.");
+        if((mode==ConnectionPolicy.Mode.AUTO && route==ConnectionPolicy.Route.SYSTEM) || route==ConnectionPolicy.Route.INTERNAL){
+            pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;verification="";verifiedAt=0;
+            detail("شبکه تغییر کرده است؛ بارگذاری متوقف شد. دوباره مسیر را بررسی کنید.");
         }
         refreshRouteText();
     }
-    private void refreshMode(){modeButton.setText(mode==ConnectionPolicy.Mode.AUTO?"مسیر: هوشمند":mode==ConnectionPolicy.Mode.SYSTEM?"مسیر: گوشی / VPN":"مسیر: پراکسی");}
+    private void refreshMode(){modeButton.setText(mode==ConnectionPolicy.Mode.AUTO?"مسیر: هوشمند":mode==ConnectionPolicy.Mode.SYSTEM?"مسیر: گوشی / VPN":mode==ConnectionPolicy.Mode.LOCAL?"مسیر: Orbot":"مسیر: Tor داخلی");}
     private void refreshRouteText(){
-        String name=route==ConnectionPolicy.Route.SOCKS?"پراکسی محلی Orbot":route==ConnectionPolicy.Route.SYSTEM?(hasVpn()?"VPN سیستم":"اینترنت گوشی، بدون VPN شناسایی‌شده"):"هنوز مسیری آماده نیست";
+        String name=route==ConnectionPolicy.Route.SOCKS?"پراکسی محلی Orbot":route==ConnectionPolicy.Route.INTERNAL?"Tor داخلی (آزمایشی)":route==ConnectionPolicy.Route.SYSTEM?(hasVpn()?"VPN سیستم":"اینترنت گوشی، بدون VPN شناسایی‌شده"):"هنوز مسیری آماده نیست";
         String checked=verifiedAt>0 && SystemClock.elapsedRealtime()-verifiedAt<300000?verification:"Tor هنوز تأیید نشده";
         routeText.setText(name+" • "+checked);
     }
@@ -269,13 +275,20 @@ public class MainActivity extends Activity {
         detail("در حال بررسی مسیر…");
         final ConnectionPolicy.Mode requested=mode;
         worker.execute(()->{
-            boolean vpn=hasVpn();boolean local=requested!=ConnectionPolicy.Mode.SYSTEM && ! (requested==ConnectionPolicy.Mode.AUTO && vpn) && socksResponds();
+            boolean vpn=hasVpn();boolean local=(requested==ConnectionPolicy.Mode.AUTO || requested==ConnectionPolicy.Mode.LOCAL) && !(requested==ConnectionPolicy.Mode.AUTO && vpn) && !embedded.isStarting() && socksResponds();
             ui.post(()->{
                 if(!alive || ticket!=routeEpoch)return;
-                ConnectionPolicy.Route choice=ConnectionPolicy.choose(requested,hasVpn(),local,supportsProxy());
+                ConnectionPolicy.Route choice=ConnectionPolicy.choose(requested,hasVpn(),local,supportsProxy(),embedded.isReady());
+                if(requested==ConnectionPolicy.Mode.EMBEDDED && hasVpn()){
+                    changing=false;route=ConnectionPolicy.Route.BLOCKED;refreshRouteText();
+                    detail("VPN سیستم فعال است. برای اتصال فعلی حالت هوشمند را انتخاب کنید؛ Tor را دوباره درون VPN راه نمی‌اندازیم.");return;
+                }
                 if(choice==ConnectionPolicy.Route.BLOCKED){
-                    changing=false;route=choice;refreshRouteText();detail("Orbot را وصل کنید؛ حالت هوشمند بدون مسیر جایگزین به اینترنت مستقیم برنمی‌گردد.");
-                    showConnectionHelp();return;
+                    changing=false;route=choice;refreshRouteText();
+                    if((requested==ConnectionPolicy.Mode.EMBEDDED || requested==ConnectionPolicy.Mode.AUTO) && supportsProxy()){
+                        queueEmbedded(next);return;
+                    }
+                    detail("هیچ مسیر غیرمستقیمی آماده نیست و برنامه به اتصال مستقیم تغییر نمی‌کند.");showConnectionHelp();return;
                 }
                 Runnable applied=()->{
                     if(!alive || ticket!=routeEpoch)return;
@@ -287,8 +300,10 @@ public class MainActivity extends Activity {
                     refreshRouteText();detail("مسیر آماده است. تأیید Tor نیاز به آزمایش جداگانه دارد.");next.run();
                 };
                 try{
-                    if(choice==ConnectionPolicy.Route.SOCKS){
-                        ProxyConfig config=new ProxyConfig.Builder().addProxyRule("socks5://127.0.0.1:"+socksPort).removeImplicitRules().build();
+                    if(choice==ConnectionPolicy.Route.SOCKS || choice==ConnectionPolicy.Route.INTERNAL){
+                        int chosenPort=choice==ConnectionPolicy.Route.INTERNAL?embedded.port():socksPort;
+                        if(chosenPort<1)throw new IllegalStateException("پورت SOCKS آماده نیست");
+                        ProxyConfig config=new ProxyConfig.Builder().addProxyRule("socks5://127.0.0.1:"+chosenPort).removeImplicitRules().build();
                         ProxyController.getInstance().setProxyOverride(config,ui::post,applied);
                     }else if(supportsProxy()) ProxyController.getInstance().clearProxyOverride(ui::post,applied);
                     else applied.run();
@@ -308,20 +323,59 @@ public class MainActivity extends Activity {
     private void history(int delta){prepareRoute(()->{if(web.canGoBackOrForward(delta)){showWeb();web.goBackOrForward(delta);}});}
     private void showHome(){web.stopLoading();web.onPause();pageArea.findViewWithTag("home").setVisibility(View.VISIBLE);web.setVisibility(View.GONE);detail("مطالعه آنلاین و متن‌های ذخیره‌شده، در یک جا.");}
     private void showWeb(){pageArea.findViewWithTag("home").setVisibility(View.GONE);web.setVisibility(View.VISIBLE);web.onResume();}
+    /** Never switch to unproxied traffic while integrated Tor connects. */
+    private void queueEmbedded(Runnable next){
+        waitingForEmbedded=next;
+        detail(embedded.isStarting()?"Tor داخلی در حال آماده‌شدن است؛ ممکن است روی این شبکه مسدود باشد.":"Tor داخلی در حال اتصال است. اگر کار نکرد از Orbot و Bridge استفاده کنید.");
+        if(!embedded.isStarting())embedded.start();
+    }
+    private void onEmbeddedEvent(boolean ready,String message){
+        if(!alive)return;
+        embeddedMessage=message;
+        if(!ready && route==ConnectionPolicy.Route.INTERNAL){
+            pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;verification="";verifiedAt=0;
+        }
+        refreshRouteText();
+        if(ready && waitingForEmbedded!=null){
+            Runnable action=waitingForEmbedded;waitingForEmbedded=null;
+            prepareRoute(action);
+        }else if(waitingForEmbedded!=null && !embedded.isStarting()){
+            waitingForEmbedded=null;
+            detail(message+" برای اتصال در شرایط فیلترینگ از Orbot با Bridge استفاده کنید.");
+        }else if(route==ConnectionPolicy.Route.BLOCKED){
+            detail(message);
+        }
+    }
+    private void useEmbedded(){
+        if(hasVpn()){
+            new AlertDialog.Builder(this).setTitle("VPN فعال است")
+                .setMessage("Tor داخلی را همزمان روی VPN دیگر راه نمی‌اندازیم. برای VPN فعلی حالت هوشمند را استفاده کنید؛ یا VPN را قطع کنید.")
+                .setPositiveButton("حالت هوشمند",(d,w)->{
+                    mode=ConnectionPolicy.Mode.AUTO;refreshMode();
+                    prefs().edit().putString("mode",mode.name()).apply();connectAndCheck();
+                }).setNegativeButton("بستن",null).show();return;
+        }
+        mode=ConnectionPolicy.Mode.EMBEDDED;
+        prefs().edit().putString("mode",mode.name()).apply();
+        routeEpoch++;changing=false;stopProbe();pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;
+        refreshMode();refreshRouteText();
+        connectAndCheck();
+    }
+
     private void chooseMode(){
         if(changing)return;
-        String[] options={"هوشمند: VPN سیستم یا Orbot؛ بدون بازگشت خودکار به مستقیم","شبکه گوشی / VPN: استفاده از مسیر عادی اندروید","فقط پراکسی Orbot روی همین گوشی"};
+        String[] options={"هوشمند: VPN، Orbot و Tor داخلی؛ بدون بازگشت خودکار به مستقیم","شبکه گوشی / VPN: استفاده از مسیر عادی اندروید","فقط پراکسی Orbot روی همین گوشی","فقط Tor داخلی: بدون پل Snowflake / obfs4"};
         new AlertDialog.Builder(this).setTitle("انتخاب مسیر")
             .setSingleChoiceItems(options,mode.ordinal(),(d,which)->{
                 mode=ConnectionPolicy.Mode.values()[which];prefs().edit().putString("mode",mode.name()).apply();
-                routeEpoch++;changing=false;stopProbe();pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;verification="";verifiedAt=0;
+                routeEpoch++;changing=false;waitingForEmbedded=null;stopProbe();pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;verification="";verifiedAt=0;
                 refreshMode();refreshRouteText();d.dismiss();
-                detail(mode==ConnectionPolicy.Mode.SYSTEM?"این حالت ممکن است مستقیم باشد؛ خودِ برنامه فیلترینگ را دور نمی‌زند.":"برای اعمال مسیر «اتصال / بررسی» را بزنید.");
+                detail(mode==ConnectionPolicy.Mode.SYSTEM?"این حالت ممکن است مستقیم باشد؛ خودِ برنامه فیلترینگ را دور نمی‌زند.":mode==ConnectionPolicy.Mode.EMBEDDED?"Tor داخلی تنها اتصال مستقیم Tor را دارد.":"برای اعمال مسیر «اتصال / بررسی» را بزنید.");
             }).setNegativeButton("بستن",null).show();
     }
     private void showConnectionHelp(){
         new AlertDialog.Builder(this).setTitle("مسیر اتصال آماده نیست")
-            .setMessage("Orbot را باز کنید و با تنظیمی که قبلاً روی اینترنت شما کار کرد متصل شوید. سپس به درس‌گذر برگردید. اگر از حالت انتخاب برنامه‌ها استفاده می‌کنید، «درس‌گذر ۰.۳» را هم انتخاب کنید.")
+            .setMessage("Tor داخلی به شبکه مستقیم Tor وابسته است و پل داخلی ندارد. اگر کار نکرد، Orbot را با Bridge موفق قبلی وصل کنید و در حالت انتخاب برنامه‌ها «درس‌گذر ۰.۴» را نیز انتخاب کنید.")
             .setPositiveButton("باز کردن Orbot",(d,w)->openOrbot()).setNeutralButton("تنظیم پورت",(d,w)->setPort())
             .setNegativeButton("فعلاً نه",null).show();
     }
@@ -334,7 +388,7 @@ public class MainActivity extends Activity {
             }
         }
         new AlertDialog.Builder(this).setTitle("Orbot پیدا نشد")
-            .setMessage("نسخه فعلی برای عبور از محدودیت‌ها به Orbot نیاز دارد. دریافت آن از وب‌سایت رسمی در مرورگر گوشی باز می‌شود.")
+            .setMessage("Tor داخلی ممکن است به‌تنهایی کار کند، اما برای Bridge های Snowflake/obfs4 همچنان به Orbot نیاز داریم.")
             .setPositiveButton("وب‌سایت رسمی",(d,w)->{try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://orbot.app/")));}catch(Exception e){toast("مرورگر دیگری پیدا نشد.");}})
             .setNegativeButton("بستن",null).show();
     }
@@ -392,10 +446,12 @@ public class MainActivity extends Activity {
         stopProbe();verifiedAt=0;verification="";refreshRouteText();detail(message);
     }
     private void showMenu(){
-        String[] items={"نشانک این صفحه","نشانک‌ها","مطالعه متن روی گوشی","ذخیره متن آفلاین","کتابخانه آفلاین","باز کردن Orbot","تنظیم پورت Orbot","راهنما و حریم خصوصی"};
+        String[] items={"نشانک این صفحه","نشانک‌ها","مطالعه متن روی گوشی","ذخیره متن آفلاین","کتابخانه آفلاین","باز کردن Orbot","تنظیم پورت Orbot","توقف Tor داخلی","راهنما و حریم خصوصی"};
         new AlertDialog.Builder(this).setTitle("ابزارها").setItems(items,(d,which)->{
             switch(which){case 0:addBookmark();break;case 1:showBookmarks();break;case 2:readText(false);break;
-                case 3:readText(true);break;case 4:showLibrary();break;case 5:openOrbot();break;case 6:setPort();break;default:guide();}
+                case 3:readText(true);break;case 4:showLibrary();break;case 5:openOrbot();break;case 6:setPort();break;
+                case 7:waitingForEmbedded=null;embedded.stop();pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;refreshRouteText();detail("Tor داخلی متوقف شد.");break;
+                default:guide();}
         }).setNegativeButton("بستن",null).show();
     }
     private String current(){String url=web.getUrl();return UrlTools.normalize(UrlTools.isHttps(url)?url:address.getText().toString());}
@@ -461,8 +517,8 @@ public class MainActivity extends Activity {
         }
     }
     private void guide(){
-        new AlertDialog.Builder(this).setTitle("درس‌گذر ۰.۳ • نسخه آزمایشی")
-            .setMessage("این نسخه کنار ۰.۲ نصب می‌شود و داده‌های آن را تغییر نمی‌دهد.\n\nهوشمند: VPN سیستم را ترجیح می‌دهد؛ در نبود VPN، پراکسی SOCKS محلی را بررسی می‌کند. نبود این دو مسیر مانع بازشدن سایت می‌شود؛ حالت «شبکه گوشی» انتخاب دستی برای اینترنت عادی است.\n\nوجود VPN به معنی Tor نیست. آزمایش اتصال فقط یک درخواست HTTPS را بررسی می‌کند؛ این مرورگر محافظت‌های Tor Browser یا تضمین جلوگیری از تمام نشت‌ها را ندارد.\n\nبرای جلوگیری قطعی از اتصال بدون VPN، تنظیم Always-on / Block connections without VPN خود اندروید لازم است. این گزینه‌ها ممکن است بقیه اتصال‌های گوشی را هم محدود کنند.\n\nنسخه فعلی همچنان به Orbot یا مسیر موجود وابسته است؛ Tor داخلی، تبدیل دامنه به .ir و اتصال هنگام قطع کامل اینترنت خارجی ندارد.\n\nمطالعه متن محلی است؛ لینک یا متن به Jina یا سرویس دیگری ارسال نمی‌شود. آزمایش Tor فقط با اقدام شما انجام می‌شود. سایت‌ها و سرویس‌های مرورگر ممکن است درخواست‌های خودشان را داشته باشند.\n\nحذف برنامه، کتابخانه آن را پاک می‌کند. خروجی متن بدون رمزگذاری است. ورود به حساب‌های حساس در این مرورگر آزمایشی توصیه نمی‌شود.")
+        new AlertDialog.Builder(this).setTitle("درس‌گذر ۰.۴ • نسخه آزمایشی")
+            .setMessage("این نسخه کنار ۰.۲ نصب می‌شود و داده‌های آن را تغییر نمی‌دهد.\n\nهوشمند: VPN سیستم را ترجیح می‌دهد؛ در نبود VPN، پراکسی SOCKS محلی را بررسی می‌کند. نبود این دو مسیر مانع بازشدن سایت می‌شود؛ حالت «شبکه گوشی» انتخاب دستی برای اینترنت عادی است.\n\nوجود VPN به معنی Tor نیست. آزمایش اتصال فقط یک درخواست HTTPS را بررسی می‌کند؛ این مرورگر محافظت‌های Tor Browser یا تضمین جلوگیری از تمام نشت‌ها را ندارد.\n\nبرای جلوگیری قطعی از اتصال بدون VPN، تنظیم Always-on / Block connections without VPN خود اندروید لازم است. این گزینه‌ها ممکن است بقیه اتصال‌های گوشی را هم محدود کنند.\n\nTor داخلی آزمایشی اضافه شده اما Snowflake و obfs4 داخل برنامه نیستند. برای فیلترینگ شدید ممکن است Orbot با Bridge ضروری باشد. دامنه جعلی .ir یا اتصال هنگام قطع کامل شبکه خارجی وجود ندارد.\n\nمطالعه متن محلی است؛ لینک یا متن به Jina یا سرویس دیگری ارسال نمی‌شود. آزمایش Tor فقط با اقدام شما انجام می‌شود. سایت‌ها و سرویس‌های مرورگر ممکن است درخواست‌های خودشان را داشته باشند.\n\nحذف برنامه، کتابخانه آن را پاک می‌کند. خروجی متن بدون رمزگذاری است. ورود به حساب‌های حساس در این مرورگر آزمایشی توصیه نمی‌شود.")
             .setPositiveButton("بستن",null).show();
     }
     private void enterFull(View v,WebChromeClient.CustomViewCallback callback){
@@ -492,6 +548,7 @@ public class MainActivity extends Activity {
     @Override protected void onDestroy(){
         alive=false;routeEpoch++;stopProbe();ui.removeCallbacksAndMessages(null);worker.shutdownNow();
         if(networkCallback!=null)try{connectivity.unregisterNetworkCallback(networkCallback);}catch(Exception ignored){ }
+        embedded.destroy();
         if(web!=null){web.stopLoading();web.destroy();}if(probe!=null)probe.destroy();super.onDestroy();
     }
 }
