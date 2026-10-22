@@ -59,6 +59,7 @@ public class MainActivity extends Activity {
     private EmbeddedTor embedded;
     private Runnable waitingForEmbedded;
     private String embeddedMessage="Tor داخلی هنوز راه‌اندازی نشده";
+    private String lastDiagnostic="";
     private ConnectionPolicy.Mode mode;
     private ConnectionPolicy.Route route=ConnectionPolicy.Route.BLOCKED;
     private ConnectivityManager connectivity;
@@ -90,7 +91,7 @@ public class MainActivity extends Activity {
             if(shared!=null) address.setText(shared.trim());
         }
     }
-    private SharedPreferences prefs(){return getSharedPreferences("darsbridge05",MODE_PRIVATE);}
+    private SharedPreferences prefs(){return getSharedPreferences("darsbridge06",MODE_PRIVATE);}
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private TextView text(String s,int size,int color){
         TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);
@@ -117,7 +118,7 @@ public class MainActivity extends Activity {
             }else shell.setPadding(dp(12),insets.getSystemWindowInsetTop(),dp(12),insets.getSystemWindowInsetBottom());
             return insets;
         });
-        TextView title=text("درس‌گذر ۰.۵",22,INK);title.setTypeface(null,Typeface.BOLD);
+        TextView title=text("درس‌گذر ۰.۶",22,INK);title.setTypeface(null,Typeface.BOLD);
         title.setPadding(dp(4),dp(12),dp(4),dp(6));shell.addView(title);
         LinearLayout bar=new LinearLayout(this);bar.setGravity(Gravity.CENTER_VERTICAL);shell.addView(bar);
         address=new EditText(this);address.setTag("address");address.setHint("آدرس سایت، مثلاً youtube.com");
@@ -339,6 +340,11 @@ public class MainActivity extends Activity {
     private void onEmbeddedEvent(boolean ready,String message){
         if(!alive)return;
         embeddedMessage=message;
+        if(message.startsWith("DIAG\\n")){
+            lastDiagnostic=message.substring(5);
+            // No analytics or uploads. Show the local error and let the user copy it deliberately.
+            showLocalDiagnostic();
+        }
         if(!ready && route==ConnectionPolicy.Route.INTERNAL){
             pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;verification="";verifiedAt=0;
         }
@@ -384,7 +390,7 @@ public class MainActivity extends Activity {
     }
     private void showConnectionHelp(){
         new AlertDialog.Builder(this).setTitle("مسیر اتصال آماده نیست")
-            .setMessage("اگر Snowflake داخلی وصل نشد، Orbot را با پل موفق قبلی راه‌اندازی کنید. در حالت انتخاب برنامه‌ها، «درس‌گذر ۰.۵» را هم انتخاب کنید. هیچ‌یک در قطع کامل همه مسیرهای خارجی دسترسی نمی‌سازند.")
+            .setMessage("اگر Snowflake داخلی وصل نشد، Orbot را با پل موفق قبلی راه‌اندازی کنید. در حالت انتخاب برنامه‌ها، «درس‌گذر ۰.۶» را هم انتخاب کنید. هیچ‌یک در قطع کامل همه مسیرهای خارجی دسترسی نمی‌سازند.")
             .setPositiveButton("باز کردن Orbot",(d,w)->openOrbot()).setNeutralButton("تنظیم پورت",(d,w)->setPort())
             .setNegativeButton("فعلاً نه",null).show();
     }
@@ -454,12 +460,33 @@ public class MainActivity extends Activity {
         if(!alive || !probeActive || ticket!=probeEpoch)return;
         stopProbe();verifiedAt=0;verification="";refreshRouteText();detail(message);
     }
+    private void showLocalDiagnostic(){
+        if(lastDiagnostic.isEmpty()){
+            new AlertDialog.Builder(this).setTitle("خطای ذخیره‌شده وجود ندارد")
+                .setMessage("ابتدا Snowflake داخلی را آزمایش کنید. گزارش فقط روی همین گوشی نمایش داده می‌شود.")
+                .setPositiveButton("بستن",null).show();
+            return;
+        }
+        final String report=lastDiagnostic;
+        new AlertDialog.Builder(this).setTitle("گزارش محلی Snowflake")
+            .setMessage(report+"\\n\\nاین اطلاعات خودکار برای کسی فرستاده نمی‌شود. اگر خواستید می‌توانید فقط متن را کپی کنید.")
+            .setPositiveButton("بستن",null)
+            .setNeutralButton("کپی گزارش",(d,w)->{
+                android.content.ClipboardManager clipboard=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+                if(clipboard!=null){
+                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("DarsBridge Snowflake diagnostic",report));
+                    toast("متن خطا کپی شد.");
+                }
+            }).show();
+    }
+
     private void showMenu(){
-        String[] items={"نشانک این صفحه","نشانک‌ها","مطالعه متن روی گوشی","ذخیره متن آفلاین","کتابخانه آفلاین","باز کردن Orbot","تنظیم پورت Orbot","توقف Tor داخلی","راهنما و حریم خصوصی"};
+        String[] items={"نشانک این صفحه","نشانک‌ها","مطالعه متن روی گوشی","ذخیره متن آفلاین","کتابخانه آفلاین","باز کردن Orbot","تنظیم پورت Orbot","توقف Tor داخلی","آخرین خطای Snowflake","راهنما و حریم خصوصی"};
         new AlertDialog.Builder(this).setTitle("ابزارها").setItems(items,(d,which)->{
             switch(which){case 0:addBookmark();break;case 1:showBookmarks();break;case 2:readText(false);break;
                 case 3:readText(true);break;case 4:showLibrary();break;case 5:openOrbot();break;case 6:setPort();break;
                 case 7:waitingForEmbedded=null;embedded.stop();pauseNetwork();route=ConnectionPolicy.Route.BLOCKED;refreshRouteText();detail("Tor داخلی متوقف شد.");break;
+                case 8:showLocalDiagnostic();break;
                 default:guide();}
         }).setNegativeButton("بستن",null).show();
     }
@@ -526,8 +553,8 @@ public class MainActivity extends Activity {
         }
     }
     private void guide(){
-        new AlertDialog.Builder(this).setTitle("درس‌گذر ۰.۵ • نسخه آزمایشی")
-            .setMessage("این نسخه کنار ۰.۳ و ۰.۴ نصب می‌شود و داده‌های آن‌ها را تغییر نمی‌دهد.\n\nهوشمند: VPN، Orbot و Snowflake داخلی را بررسی می‌کند. اگر هیچ مسیر مناسبی نبود، اتصال مستقیم را جایگزین نمی‌کند. حالت «شبکه گوشی» انتخاب دستی برای اینترنت عادی است.\n\nوجود VPN به معنی Tor نیست. آزمایش اتصال فقط یک درخواست HTTPS را بررسی می‌کند؛ این مرورگر محافظت‌های Tor Browser یا تضمین جلوگیری از تمام نشت‌ها را ندارد.\n\nبرای جلوگیری قطعی از اتصال بدون VPN، تنظیم Always-on / Block connections without VPN خود اندروید لازم است. این گزینه‌ها ممکن است بقیه اتصال‌های گوشی را هم محدود کنند.\n\nSnowflake داخلی آزمایشی اضافه شده، اما obfs4 و WebTunnel داخلی هنوز نیستند. اگر Snowflake متصل نشد، Orbot با Bridge را امتحان کنید. دامنه جعلی .ir یا اتصال هنگام قطع کامل شبکه خارجی وجود ندارد.\n\nمطالعه متن محلی است؛ لینک یا متن به Jina یا سرویس دیگری ارسال نمی‌شود. آزمایش Tor فقط با اقدام شما انجام می‌شود. سایت‌ها و سرویس‌های مرورگر ممکن است درخواست‌های خودشان را داشته باشند.\n\nحذف برنامه، کتابخانه آن را پاک می‌کند. خروجی متن بدون رمزگذاری است. ورود به حساب‌های حساس در این مرورگر آزمایشی توصیه نمی‌شود.")
+        new AlertDialog.Builder(this).setTitle("درس‌گذر ۰.۶ • نسخه آزمایشی")
+            .setMessage("این نسخه کنار نسخه‌های قبلی نصب می‌شود و داده‌های آن‌ها را تغییر نمی‌دهد. اگر Snowflake آماده نشد، نام مرحله و نوع خطا روی دستگاه نمایش داده می‌شود و اطلاعاتی خودکار ارسال نخواهد شد.\n\nهوشمند: VPN، Orbot و Snowflake داخلی را بررسی می‌کند. اگر هیچ مسیر مناسبی نبود، اتصال مستقیم را جایگزین نمی‌کند. حالت «شبکه گوشی» انتخاب دستی برای اینترنت عادی است.\n\nوجود VPN به معنی Tor نیست. آزمایش اتصال فقط یک درخواست HTTPS را بررسی می‌کند؛ این مرورگر محافظت‌های Tor Browser یا تضمین جلوگیری از تمام نشت‌ها را ندارد.\n\nبرای جلوگیری قطعی از اتصال بدون VPN، تنظیم Always-on / Block connections without VPN خود اندروید لازم است. این گزینه‌ها ممکن است بقیه اتصال‌های گوشی را هم محدود کنند.\n\nSnowflake داخلی آزمایشی اضافه شده، اما obfs4 و WebTunnel داخلی هنوز نیستند. اگر Snowflake متصل نشد، Orbot با Bridge را امتحان کنید. دامنه جعلی .ir یا اتصال هنگام قطع کامل شبکه خارجی وجود ندارد.\n\nمطالعه متن محلی است؛ لینک یا متن به Jina یا سرویس دیگری ارسال نمی‌شود. آزمایش Tor فقط با اقدام شما انجام می‌شود. سایت‌ها و سرویس‌های مرورگر ممکن است درخواست‌های خودشان را داشته باشند.\n\nحذف برنامه، کتابخانه آن را پاک می‌کند. خروجی متن بدون رمزگذاری است. ورود به حساب‌های حساس در این مرورگر آزمایشی توصیه نمی‌شود.")
             .setPositiveButton("بستن",null).show();
     }
     private void enterFull(View v,WebChromeClient.CustomViewCallback callback){
