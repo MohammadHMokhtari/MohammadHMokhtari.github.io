@@ -340,7 +340,7 @@ public class MainActivity extends Activity {
     private void onEmbeddedEvent(boolean ready,String message){
         if(!alive)return;
         embeddedMessage=message;
-        if(message.startsWith("DIAG\\n")){
+        if(message.startsWith("DIAG\n")){
             lastDiagnostic=message.substring(5);
             // No analytics or uploads. Show the local error and let the user copy it deliberately.
             showLocalDiagnostic();
@@ -469,7 +469,7 @@ public class MainActivity extends Activity {
         }
         final String report=lastDiagnostic;
         new AlertDialog.Builder(this).setTitle("گزارش محلی Snowflake")
-            .setMessage(report+"\\n\\nاین اطلاعات خودکار برای کسی فرستاده نمی‌شود. اگر خواستید می‌توانید فقط متن را کپی کنید.")
+            .setMessage(report+"\n\nاین اطلاعات خودکار برای کسی فرستاده نمی‌شود. اگر خواستید می‌توانید فقط متن را کپی کنید.")
             .setPositiveButton("بستن",null)
             .setNeutralButton("کپی گزارش",(d,w)->{
                 android.content.ClipboardManager clipboard=(android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
