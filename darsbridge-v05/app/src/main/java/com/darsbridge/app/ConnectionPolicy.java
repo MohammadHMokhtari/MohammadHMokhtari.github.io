@@ -1,14 +1,14 @@
 package com.darsbridge.app;
 /** No silent direct fallback from an automatic route. */
 public final class ConnectionPolicy {
-    public enum Mode { AUTO, SYSTEM, LOCAL, EMBEDDED }
+    public enum Mode { AUTO, SYSTEM, LOCAL, EMBEDDED, SNOWFLAKE }
     public enum Route { BLOCKED, SYSTEM, SOCKS, INTERNAL }
     private ConnectionPolicy() {}
     public static Route choose(Mode mode, boolean hasVpn, boolean hasLocalSocks,
                                boolean proxySupported, boolean internalReady) {
         if (mode == Mode.SYSTEM) return Route.SYSTEM;
         if (mode == Mode.LOCAL) return hasLocalSocks && proxySupported ? Route.SOCKS : Route.BLOCKED;
-        if (mode == Mode.EMBEDDED) return internalReady && proxySupported ? Route.INTERNAL : Route.BLOCKED;
+        if (mode == Mode.EMBEDDED || mode == Mode.SNOWFLAKE) return internalReady && proxySupported ? Route.INTERNAL : Route.BLOCKED;
         if (hasVpn) return Route.SYSTEM;
         if (internalReady && proxySupported) return Route.INTERNAL;
         return hasLocalSocks && proxySupported ? Route.SOCKS : Route.BLOCKED;
