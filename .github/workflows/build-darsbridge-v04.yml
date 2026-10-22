@@ -22,10 +22,10 @@ jobs:
         with:
           log-accepted-android-sdk-licenses: false
       - name: Install SDK
-        run: sdkmanager --channel=3 'platforms;android-37.0' 'build-tools;36.0.0'
+        run: sdkmanager --channel=3 'platforms;android-37.2' 'build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.4.1'
+          gradle-version: '9.6.0'
       - name: Unit tests, lint and APK
         working-directory: darsbridge-v04
         run: gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --no-daemon --stacktrace
