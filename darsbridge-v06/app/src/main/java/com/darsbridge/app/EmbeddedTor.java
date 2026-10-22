@@ -136,12 +136,12 @@ final class EmbeddedTor {
             }catch(Exception | LinkageError e){
                 String label=e instanceof SnowflakeTransport.SetupFailure
                     ? ((SnowflakeTransport.SetupFailure)e).userMessage()
-                    : "کد خطا: "+stage+"\\nنوع: "+e.getClass().getSimpleName()
-                        +"\\nشرح: "+safeMessage(e);
+                    : "کد خطا: "+stage+"\nنوع: "+e.getClass().getSimpleName()
+                        +"\nشرح: "+safeMessage(e);
                 android.util.Log.e("DarsBridgeTransport","Transport setup failure at "+stage,e);
                 ui.post(()->{
                     if(!destroyed && starting && ticket==attempt)
-                        fail("DIAG\\n"+label);
+                        fail("DIAG\n"+label);
                 });
             }
         });
@@ -151,7 +151,7 @@ final class EmbeddedTor {
         String info=error.getMessage();
         if(info==null)return "";
         if(info.contains("/") || info.contains("://"))return "[مسیر داخلی یا نشانی حذف شد]";
-        info=info.replace("\\r"," ").replace("\\n"," ");
+        info=info.replace("\r"," ").replace("\n"," ");
         return info.length()>130?info.substring(0,130):info;
     }
 
