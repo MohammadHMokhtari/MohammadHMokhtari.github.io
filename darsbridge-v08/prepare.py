@@ -11,8 +11,8 @@ HERE = Path(__file__).resolve().parent
 BASE = HERE.parent / 'darsbridge-v07' / 'project'
 OUT = HERE / 'project'
 BASE_DIGEST = 'b834959b39951ec5436b867dd11d924ae17a5f7acff92b8cbe7c3c559978195b'
-GZIP_DIGEST = '29c2eca9dd5aa3e3400a34dfb80219cd01573bf4aeb7bbe5f1cf7210c5fa1f05'
-PATCH_DIGEST = '2f98c2f43960954829de411c1e38d93537dc2f37704c7c6c3b12e4e78d652b77'
+GZIP_DIGEST = 'a6b2ba32ff17aebc9d52e6b9f5a754992632e21d7bdac53db0217d419b994b6f'
+PATCH_DIGEST = '7e9ca6b4c11f39a5016d0b8b46a5e4910287364b4aeb1e6a5c09cfb54c215e15'
 
 def directory_digest(directory):
     h=hashlib.sha256()
