@@ -1,0 +1,113 @@
+name: Build and test DarsBridge 0.7
+on:
+  push:
+    branches: [darsbridge-v07]
+    paths:
+      - darsbridge-v07/**
+      - .github/workflows/build-darsbridge-v07.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: darsbridge-v07-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify baseline and prepare readable source
+        run: python3 darsbridge-v07/prepare.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '24'
+      - uses: android-actions/setup-android@v4
+        with:
+          log-accepted-android-sdk-licenses: false
+      - name: Install SDK
+        run: sdkmanager --channel=3 'platforms;android-37.2' 'build-tools;36.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+      - name: Unit tests, lint and APK
+        run: gradle -p darsbridge-v07/project :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --no-daemon --stacktrace
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android 16 UI, stop, backup and local Snowflake tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 2048M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: |
+            gradle -p darsbridge-v07/project :app:connectedDebugAndroidTest --no-daemon --stacktrace
+            mkdir -p build-output
+            adb install -r darsbridge-v07/project/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -W -n com.darsbridge.app.v07/com.darsbridge.app.MainActivity
+            sleep 2
+            adb exec-out screencap -p > build-output/home.png
+      - name: Build ARM64 phone APK
+        run: gradle -p darsbridge-v07/project :app:assembleDebug -PphoneAbi=arm64-v8a --no-daemon --stacktrace
+      - name: Verify and package output
+        run: |
+          mkdir -p build-output
+          cp darsbridge-v07/project/app/build/outputs/apk/debug/app-debug.apk build-output/DarsBridge-0.7.apk
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('build-output/DarsBridge-0.7.apk') as z:
+              names = z.namelist()
+              assert 'lib/arm64-v8a/libtor.so' in names
+              assert not any(n.startswith(('lib/x86/', 'lib/x86_64/', 'lib/armeabi-v7a/')) for n in names)
+              assert z.testzip() is None
+          PY
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build-output/DarsBridge-0.7.apk
+          cd build-output && sha256sum DarsBridge-0.7.apk > SHA256SUMS.txt
+      - name: Archive complete readable source
+        if: always()
+        run: |
+          mkdir -p build-output
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          root = Path('darsbridge-v07/project')
+          with ZipFile('build-output/DarsBridge-0.7-source.zip','w',ZIP_DEFLATED) as z:
+              if root.exists():
+                  for p in sorted(root.rglob('*')):
+                      rel = p.relative_to(root)
+                      if p.is_file() and not any(x in ('build','.gradle','.kotlin') for x in rel.parts):
+                          z.write(p,'DarsBridge-0.7/'+str(rel))
+              patch = Path('darsbridge-v07/changes.generated.patch')
+              if patch.exists(): z.write(patch,'review/changes-from-0.6.patch')
+          PY
+      - name: Upload tested APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarsBridge-0.7-APK
+          path: |
+            build-output/DarsBridge-0.7.apk
+            build-output/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload reports, source and screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarsBridge-0.7-QA
+          path: |
+            darsbridge-v07/project/app/build/reports/
+            darsbridge-v07/project/app/build/test-results/
+            darsbridge-v07/project/app/build/outputs/androidTest-results/
+            build-output/home.png
+            build-output/DarsBridge-0.7-source.zip
+          retention-days: 14
