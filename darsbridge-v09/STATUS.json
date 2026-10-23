@@ -1,0 +1,36 @@
+{
+  "version": "0.9",
+  "stage": "BASELINE_REVIEW_COMPLETE",
+  "checked_date_tehran": "2026-10-24",
+  "branch": "darsbridge-v09",
+  "baseline_branch": "darsbridge-v08",
+  "baseline_sha": "e877464564a1fd918652b5f552f04dba12f269a2",
+  "baseline_ci": {
+    "run_id": 40039485787,
+    "conclusion": "success",
+    "unit_tests": 63,
+    "android_tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "lint_errors": 0,
+    "lint_warnings": 12
+  },
+  "baseline_source_artifact_match_files": 27,
+  "implementation_started": false,
+  "v09_apk_produced": false,
+  "v09_ci": "NOT_RUN",
+  "next_steps": [
+    "Commit readable independent 0.9 source",
+    "Connect transport lifecycle events with generation checks",
+    "Revalidate health across network and foreground transitions",
+    "Add behavioral recovery and traffic measurement tests",
+    "Run full CI and deliver tested APK"
+  ],
+  "known_limitations": [
+    "No new phone test in this review",
+    "No measured DNS/WebRTC leak coverage in 0.8",
+    "No full anonymity or OS kill-switch guarantee",
+    "Stable release signing and migration remain to be designed"
+  ]
+}
