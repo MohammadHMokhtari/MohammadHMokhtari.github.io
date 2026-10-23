@@ -1,0 +1,22 @@
+name: DarsBridge source snapshot
+on:
+  push:
+    branches: [darsbridge-v07]
+    paths: [.github/workflows/darsbridge-source-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Archive verified baseline source
+        run: |
+          mkdir -p snapshot
+          git archive --format=zip -o snapshot/DarsBridge-0.6-baseline-source.zip 8c60b0fddcd5b1e6fa7858c4f7100da570599c7c darsbridge-v06 .github/workflows/build-darsbridge-v06.yml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DarsBridge-baseline-source
+          path: snapshot/DarsBridge-0.6-baseline-source.zip
+          retention-days: 7
