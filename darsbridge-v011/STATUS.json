@@ -1,6 +1,6 @@
 {
   "version": "0.11.0",
-  "stage": "SIGNED_RELEASE_CI_PASS_PHONE_TEST_PENDING",
+  "stage": "SIGNED_RELEASE_CI_PASS_USER_CONFIRMED_WORKING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v011",
   "baseline_branch": "darsbridge-v010",
@@ -12,17 +12,16 @@
   "private_key_in_repository": false,
   "private_key_in_ci": false,
   "apk_produced": true,
-  "phone_test": "PENDING_USER",
+  "phone_test": "USER_CONFIRMED_WORKING",
   "features": [
     "Short Persian guidance for ordinary phone tests",
     "Local allow-listed connection snapshot with explicit clipboard copy",
     "No URLs, IPs, SSIDs, saved content or raw errors in the status report"
   ],
   "next_steps": [
-    "Install 0.11 as an update over 0.10 without uninstalling; back up important local data first",
-    "Try opening a site, playing video/fullscreen, leaving and returning to the app, and any existing bookmarks/offline text",
-    "If a problem occurs, describe the failed action and Wi-Fi/mobile data; optionally copy the local status from the guide",
-    "After phone confirmation, assess additional free bridge options and connection diagnostics before expanding browser features"
+    "Use phone-confirmed 0.11 as the baseline",
+    "Verify obfs4 and webtunnel native bindings and local SOCKS listeners in an isolated Android probe",
+    "Implement alternate-bridge selection and validated bridge input after the probe passes; no phone download needed for the isolated probe"
   ],
   "known_limitations": [
     "No new bridge or guaranteed speed improvement",
@@ -94,5 +93,6 @@
     }
   },
   "baseline_head_sha": "7ce1bb18648f03347110ed2cc803d30662cdffd8",
-  "phone_validation_scope": "0.10 general operation confirmed by user. 0.11 phone installation and ordinary usage still pending."
+  "phone_validation_scope": "User confirmed 0.11 worked after instructions to open a site and play a video; detailed individual migration, fullscreen and network-transition cases were not separately reported.",
+  "phone_feedback_fa": "درست کار کرد"
 }
