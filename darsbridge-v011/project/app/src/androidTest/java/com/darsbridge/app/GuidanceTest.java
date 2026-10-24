@@ -27,6 +27,18 @@ public class GuidanceTest {
         WebView web=activity.getWindow().getDecorView().findViewWithTag("web");
         assertNull(web.getUrl());assertTrue(web.getSettings().getBlockNetworkLoads());
     }
+    private void accessibilityClick(String text){
+        String target=InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName();
+        for(android.view.accessibility.AccessibilityWindowInfo window:InstrumentationRegistry.getInstrumentation().getUiAutomation().getWindows()){
+            android.view.accessibility.AccessibilityNodeInfo root=window.getRoot();if(root==null)continue;
+            for(android.view.accessibility.AccessibilityNodeInfo node:root.findAccessibilityNodeInfosByText(text)){
+                if(text.contentEquals(node.getText()) && target.contentEquals(node.getPackageName())){
+                    assertTrue("App button must accept explicit accessibility click",node.performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK));return;
+                }
+            }
+        }
+        fail("App button not found: "+text);
+    }
     @Test public void homeHelpAndStatusDoNotStartConnectionOrMutateLibrary()throws Exception{
         Context c=InstrumentationRegistry.getInstrumentation().getTargetContext();
         String pagesBefore=new PageStore(c).read().toString();
@@ -65,18 +77,27 @@ public class GuidanceTest {
         }
     }
     @Test public void openingReportLeavesClipboardUntouchedUntilExplicitCopy()throws Exception{
+        java.util.concurrent.CountDownLatch copied=new java.util.concurrent.CountDownLatch(1);
+        ClipboardManager.OnPrimaryClipChangedListener listener=copied::countDown;
         try(ActivityScenario<MainActivity> scenario=ActivityScenario.launch(MainActivity.class)){
             scenario.onActivity(a->{
                 ClipboardManager clipboard=(ClipboardManager)a.getSystemService(Context.CLIPBOARD_SERVICE);
                 clipboard.setPrimaryClip(ClipData.newPlainText("test","clipboard-sentinel"));
                 invoke(a,"showConnectionReport");
                 assertEquals("clipboard-sentinel",clipboard.getPrimaryClip().getItemAt(0).getText().toString());assertOffline(a);
+                clipboard.addPrimaryClipChangedListener(listener);
             });
-            waitFor("کپی وضعیت").click();
+            waitFor("کپی وضعیت");
+            // Android's clipboard preview can cover the button's screen coordinates.
+            // Invoke the actual app button through accessibility, then await its clipboard change.
+            accessibilityClick("کپی وضعیت");
+            assertTrue("Explicit copy did not update clipboard",copied.await(5,java.util.concurrent.TimeUnit.SECONDS));
             scenario.onActivity(a->{
                 ClipboardManager clipboard=(ClipboardManager)a.getSystemService(Context.CLIPBOARD_SERVICE);
+                clipboard.removePrimaryClipChangedListener(listener);
                 String value=clipboard.getPrimaryClip().getItemAt(0).getText().toString();
-                assertTrue(value.contains("وضعیت محلی درس‌گذر"));assertTrue(value.contains("نسخه: 0.11.0 (11)"));assertOffline(a);
+                assertTrue("Copied text must be the local report",value.contains("وضعیت محلی درس‌گذر"));
+                assertTrue("Report must identify actual app version",value.contains("نسخه: 0.11.0 (11)"));assertOffline(a);
                 clipboard.setPrimaryClip(ClipData.newPlainText("test",""));
             });
         }
