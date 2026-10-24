@@ -1,7 +1,7 @@
 {
   "version": "0.12.0",
   "version_code": 12,
-  "stage": "DIRECT_IP_SCANNER_IMPLEMENTED_CI_PENDING",
+  "stage": "SIGNED_RELEASE_CI_PASS_PHONE_TEST_PENDING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v012",
   "baseline_branch": "darsbridge-v011",
@@ -17,9 +17,52 @@
     "Cancellation on dismissal/background/network change; no browser route change"
   ],
   "ci": {
-    "status": "PENDING_RUN"
+    "run_id": 40119560730,
+    "url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40119560730",
+    "status": "COMPLETED",
+    "conclusion": "success",
+    "unit": {
+      "tests": 87,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "android": {
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "release_upgrade_tests": 2,
+    "lint": {
+      "debug": {
+        "errors": 0,
+        "warnings": 19
+      },
+      "release": {
+        "errors": 0,
+        "warnings": 19
+      }
+    },
+    "upgrade_proof": {
+      "before_version_code": 11,
+      "data_sha_before": "398f8b3eafdf3d2404a707d3191e8f4a74e6d29ad5c8a242a9c0a84f01f4e924",
+      "cert_sha_before": "a0665d4144e1c726bcef2a1a5bc52fb9b01adfe58d40919e872d781e0e7c5bb2",
+      "application_id": "com.darsbridge.browser",
+      "after_version_code": 12,
+      "after_version_name": "0.12.0",
+      "data_sha_after": "398f8b3eafdf3d2404a707d3191e8f4a74e6d29ad5c8a242a9c0a84f01f4e924",
+      "cert_sha_after": "a0665d4144e1c726bcef2a1a5bc52fb9b01adfe58d40919e872d781e0e7c5bb2",
+      "non_debuggable": true,
+      "passed": true,
+      "signer_kind": "disposable CI upgrade-test key; not the production release key",
+      "baseline_runtime_unchanged": true,
+      "before_source_sha": "c40348da44183ec56069d0ee9c4cb7158d93b859",
+      "before_version_name": "0.11.0",
+      "source_upgrade": "tested 0.11 runtime source to new 0.12 source"
+    }
   },
-  "apk_produced": false,
+  "apk_produced": true,
   "phone_test": "PENDING_USER",
   "native_probe": {
     "conclusion": "success",
@@ -37,8 +80,31 @@
     "A complete disconnection or source-access whitelist is not bypassed by address search"
   ],
   "next_steps": [
-    "Complete build, unit, Android, TLS validation, cancellation and 0.11-to-0.12 upgrade checks",
-    "Sign ARM64 release with unchanged private key outside CI",
-    "Deliver scanner and explain results in a short phone test"
+    "Install as an update over phone-confirmed 0.11 without uninstalling; back up important data first",
+    "With phone VPN off, open Direct IP search, choose a service and start; report TCP and verified HTTPS counts",
+    "Verify normal browsing, video and stored content still work; real shutdown success is not established by CI",
+    "Consider explicit per-service use of verified IPs as a separate feature; no implicit direct fallback or universal gateway claim",
+    "Keep alternative obfs4/WebTunnel integration pending; the earlier native probe remains evidence only"
+  ],
+  "code_sha": "ed3c582b772f98b6f4ab003733fb98666b058bcb",
+  "apk_bytes": 34436180,
+  "apk_sha256": "2e9de076fb7a8584af8aca34b60d979258c470b28c831aeb6286846143ac210f",
+  "signing": {
+    "kind": "persistent private release key",
+    "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "v2_verified": true,
+    "v3_verified": true,
+    "private_key_in_ci": false
+  },
+  "payload_entries_verified_unchanged": 73,
+  "native_libraries_16k_aligned": 2,
+  "production_cert_matches_011": true,
+  "tls_fixture_absent_from_production_apk": true,
+  "source_artifact_match_files": 64,
+  "screenshots_reviewed": [
+    "ip-scan",
+    "home-light",
+    "home-dark",
+    "help"
   ]
 }
