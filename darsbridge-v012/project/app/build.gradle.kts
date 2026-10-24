@@ -39,7 +39,7 @@ android {
     sourceSets.getByName("androidTest").java.setSrcDirs(
         listOf(if (releaseQa) "src/upgradeTest/java" else "src/androidTest/java")
     )
-    sourceSets.getByName("androidTest").assets.srcDir(layout.buildDirectory.dir("generated/ipTestAssets"))
+    sourceSets.getByName("androidTest").assets.srcDir("build/generated/ipTestAssets")
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
