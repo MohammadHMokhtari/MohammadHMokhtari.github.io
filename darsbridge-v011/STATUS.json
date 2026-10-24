@@ -1,6 +1,6 @@
 {
   "version": "0.11.0",
-  "stage": "IMPLEMENTED_CI_PENDING",
+  "stage": "SIGNED_RELEASE_CI_PASS_PHONE_TEST_PENDING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v011",
   "baseline_branch": "darsbridge-v010",
@@ -11,7 +11,7 @@
   "expected_release_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
   "private_key_in_repository": false,
   "private_key_in_ci": false,
-  "apk_produced": false,
+  "apk_produced": true,
   "phone_test": "PENDING_USER",
   "features": [
     "Short Persian guidance for ordinary phone tests",
@@ -19,13 +19,80 @@
     "No URLs, IPs, SSIDs, saved content or raw errors in the status report"
   ],
   "next_steps": [
-    "Run unit, lint, Android and real 0.10-to-0.11 source upgrade checks",
-    "Sign ARM64 production APK with unchanged persistent 0.10 key and verify certificate",
-    "Deliver APK as an in-place update with simple user instructions"
+    "Install 0.11 as an update over 0.10 without uninstalling; back up important local data first",
+    "Try opening a site, playing video/fullscreen, leaving and returning to the app, and any existing bookmarks/offline text",
+    "If a problem occurs, describe the failed action and Wi-Fi/mobile data; optionally copy the local status from the guide",
+    "After phone confirmation, assess additional free bridge options and connection diagnostics before expanding browser features"
   ],
   "known_limitations": [
     "No new bridge or guaranteed speed improvement",
     "Not Tor Browser; no universal no-leak guarantee",
     "Local report is a snapshot, not a network health measurement"
-  ]
+  ],
+  "code_sha": "c40348da44183ec56069d0ee9c4cb7158d93b859",
+  "apk_bytes": 34436180,
+  "apk_sha256": "f24ad3cd8d4807966f77317d8472fcab15ecb128b1f53f199f8ea0d9706c349d",
+  "signing": {
+    "kind": "persistent private release key",
+    "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "v2_verified": true,
+    "v3_verified": true,
+    "private_key_in_ci": false
+  },
+  "payload_entries_verified_unchanged": 73,
+  "native_libraries_16k_aligned": 2,
+  "production_cert_matches_010": true,
+  "screenshots_reviewed": [
+    "help",
+    "status",
+    "home-light",
+    "home-dark"
+  ],
+  "source_artifact_match_files": 51,
+  "ci": {
+    "run_id": 40085701431,
+    "url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40085701431",
+    "conclusion": "success",
+    "unit": {
+      "tests": 77,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "android": {
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "release_upgrade_tests": 2,
+    "lint": {
+      "debug": {
+        "errors": 0,
+        "warnings": 10
+      },
+      "release": {
+        "errors": 0,
+        "warnings": 10
+      }
+    },
+    "upgrade_proof": {
+      "before_version_code": 10,
+      "data_sha_before": "d734347d4d59b5025f3e21db5bf22ef2b9952876a0e8459748ecc4bb09ee9ebd",
+      "cert_sha_before": "3c9e61f1319a3fc62e39e47687667dcffcd189c11606bf38e1a25da5fa2ea2d8",
+      "application_id": "com.darsbridge.browser",
+      "after_version_code": 11,
+      "after_version_name": "0.11.0",
+      "data_sha_after": "d734347d4d59b5025f3e21db5bf22ef2b9952876a0e8459748ecc4bb09ee9ebd",
+      "cert_sha_after": "3c9e61f1319a3fc62e39e47687667dcffcd189c11606bf38e1a25da5fa2ea2d8",
+      "non_debuggable": true,
+      "passed": true,
+      "signer_kind": "disposable CI upgrade-test key; not the production release key",
+      "before_source_sha": "e39650a2778a531226d8b214f9ba76658cac3944",
+      "before_version_name": "0.10.0",
+      "source_upgrade": "tested 0.10 source to new 0.11 source"
+    }
+  },
+  "baseline_head_sha": "7ce1bb18648f03347110ed2cc803d30662cdffd8",
+  "phone_validation_scope": "0.10 general operation confirmed by user. 0.11 phone installation and ordinary usage still pending."
 }

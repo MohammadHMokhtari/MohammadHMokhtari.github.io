@@ -1,0 +1,68 @@
+{
+  "version": "0.11.0",
+  "version_code": 11,
+  "application_id": "com.darsbridge.browser",
+  "debuggable": false,
+  "code_sha": "c40348da44183ec56069d0ee9c4cb7158d93b859",
+  "run_url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40085701431",
+  "unit": {
+    "tests": 77,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android": {
+    "tests": 31,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "release_upgrade_tests": 2,
+  "upgrade_proof": {
+    "before_version_code": 10,
+    "data_sha_before": "d734347d4d59b5025f3e21db5bf22ef2b9952876a0e8459748ecc4bb09ee9ebd",
+    "cert_sha_before": "3c9e61f1319a3fc62e39e47687667dcffcd189c11606bf38e1a25da5fa2ea2d8",
+    "application_id": "com.darsbridge.browser",
+    "after_version_code": 11,
+    "after_version_name": "0.11.0",
+    "data_sha_after": "d734347d4d59b5025f3e21db5bf22ef2b9952876a0e8459748ecc4bb09ee9ebd",
+    "cert_sha_after": "3c9e61f1319a3fc62e39e47687667dcffcd189c11606bf38e1a25da5fa2ea2d8",
+    "non_debuggable": true,
+    "passed": true,
+    "signer_kind": "disposable CI upgrade-test key; not the production release key",
+    "before_source_sha": "e39650a2778a531226d8b214f9ba76658cac3944",
+    "before_version_name": "0.10.0",
+    "source_upgrade": "tested 0.10 source to new 0.11 source"
+  },
+  "lint": {
+    "debug": {
+      "errors": 0,
+      "warnings": 10
+    },
+    "release": {
+      "errors": 0,
+      "warnings": 10
+    }
+  },
+  "abi": "arm64-v8a",
+  "unsigned_apk_file": "DarsBridge-0.11-unsigned.apk",
+  "unsigned_apk_sha256": "3a433ab866ce2673e174b3e9c8b63c76168dfadfafdc6c327797e3da79328372",
+  "apksigner_jar_sha256": "3716d9311e55d2b0918a2fd9d54ba9e406c5f6abeea700b287f11259bc163dec",
+  "expected_release_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "stage": "SIGNED_RELEASE_VERIFIED_PHONE_TEST_PENDING",
+  "phone_validation": "Pending user installation; 0.10 is the phone-confirmed working reference",
+  "limits": [
+    "Not Tor Browser; no OS kill switch or universal no-leak guarantee",
+    "Upgrade test uses a disposable CI key on a non-debuggable release variant; production key never enters CI",
+    "Migration from 0.9 requires its local JSON backup; website sessions and route selection are not imported"
+  ],
+  "apk_sha256": "f24ad3cd8d4807966f77317d8472fcab15ecb128b1f53f199f8ea0d9706c349d",
+  "apk_bytes": 34436180,
+  "signing": {
+    "kind": "persistent private release key",
+    "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "v2_verified": true,
+    "v3_verified": true,
+    "private_key_in_ci": false
+  }
+}
