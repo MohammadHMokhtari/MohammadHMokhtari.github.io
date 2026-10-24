@@ -1,6 +1,6 @@
 {
   "version": "0.9",
-  "stage": "BASELINE_REVIEW_COMPLETE",
+  "stage": "IMPLEMENTED_CI_PENDING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v09",
   "baseline_branch": "darsbridge-v08",
@@ -17,15 +17,13 @@
     "lint_warnings": 12
   },
   "baseline_source_artifact_match_files": 27,
-  "implementation_started": false,
+  "implementation_started": true,
   "v09_apk_produced": false,
-  "v09_ci": "NOT_RUN",
+  "v09_ci": "PENDING",
   "next_steps": [
-    "Commit readable independent 0.9 source",
-    "Connect transport lifecycle events with generation checks",
-    "Revalidate health across network and foreground transitions",
-    "Add behavioral recovery and traffic measurement tests",
-    "Run full CI and deliver tested APK"
+    "Run unit/lint/build and Android emulator CI",
+    "Inspect actual reports and fix failures",
+    "Deliver signed ARM64 debug APK and phone test guide"
   ],
   "known_limitations": [
     "No new phone test in this review",
