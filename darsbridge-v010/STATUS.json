@@ -1,6 +1,6 @@
 {
   "version": "0.10.0",
-  "stage": "IMPLEMENTED_CI_AND_PRIVATE_SIGNING_PENDING",
+  "stage": "SIGNED_RELEASE_CI_PASS_PHONE_TEST_PENDING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v010",
   "baseline_branch": "darsbridge-v09",
@@ -10,19 +10,60 @@
   "expected_release_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
   "private_key_in_repository": false,
   "private_key_in_ci": false,
-  "ci": "PENDING",
-  "apk_produced": false,
-  "phone_test": "PENDING",
+  "ci": {
+    "run_id": 40079414368,
+    "url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40079414368",
+    "conclusion": "success",
+    "unit": {
+      "tests": 71,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "android": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "release_upgrade_tests": 2,
+    "lint": {
+      "debug": {
+        "errors": 0,
+        "warnings": 10
+      },
+      "release": {
+        "errors": 0,
+        "warnings": 10
+      }
+    }
+  },
+  "apk_produced": true,
+  "phone_test": "PENDING_USER",
   "next_steps": [
-    "Run unit, lint debug/release and Android regression/migration tests",
-    "Install non-debuggable release 10, seed state, update to 11 and verify data equality",
-    "Verify unsigned input and sign privately using the persistent key",
-    "Verify signature and deliver ARM64 APK with one-time 0.9 migration guide"
+    "Install 0.10 alongside working 0.9; keep 0.9 until migration is checked",
+    "Export 0.9 JSON backup and import with merge; verify bookmarks and offline Persian text",
+    "Test internal Snowflake, Tor exit, search, YouTube/fullscreen and network transitions on user phone",
+    "Future releases must reuse fixed application ID, preference namespace and private signing key with increasing versionCode"
   ],
   "known_limitations": [
     "Initial install is separate from 0.9; JSON backup required for legacy data",
     "Backup does not transfer sessions, route choice or proxy port",
     "No automatic update download or installation",
     "Not Tor Browser; no universal no-leak guarantee"
-  ]
+  ],
+  "code_sha": "e39650a2778a531226d8b214f9ba76658cac3944",
+  "apk_bytes": 34436180,
+  "apk_sha256": "b166c829dade1fdb7514ba5e1f40d01e60f84d860085bd35069b5366c13be8db",
+  "signing": {
+    "kind": "persistent private release key",
+    "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "v2_verified": true,
+    "v3_verified": true,
+    "private_key_in_ci": false
+  },
+  "upgrade_data_hash_preserved": true,
+  "source_artifact_match_files": 48,
+  "payload_entries_verified_unchanged": 73,
+  "private_signing_recovery_preserved": true
 }

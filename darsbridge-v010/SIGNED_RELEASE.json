@@ -1,0 +1,65 @@
+{
+  "version": "0.10.0",
+  "version_code": 10,
+  "application_id": "com.darsbridge.browser",
+  "debuggable": false,
+  "code_sha": "e39650a2778a531226d8b214f9ba76658cac3944",
+  "run_url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40079414368",
+  "unit": {
+    "tests": 71,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android": {
+    "tests": 28,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "release_upgrade_tests": 2,
+  "upgrade_proof": {
+    "before_version_code": 10,
+    "data_sha_before": "f05298eaf8c3ff88bcc99b9e805a22d9423cefdbd9d1abaf3d856ce33376eadc",
+    "cert_sha_before": "5ffa9754e7e493604bc3b0e361eb1ea0fc648c6ee66059ab0fa304144edf1155",
+    "application_id": "com.darsbridge.browser",
+    "after_version_code": 11,
+    "data_sha_after": "f05298eaf8c3ff88bcc99b9e805a22d9423cefdbd9d1abaf3d856ce33376eadc",
+    "cert_sha_after": "5ffa9754e7e493604bc3b0e361eb1ea0fc648c6ee66059ab0fa304144edf1155",
+    "non_debuggable": true,
+    "passed": true,
+    "signer_kind": "disposable CI upgrade-test key; not the production release key"
+  },
+  "lint": {
+    "debug": {
+      "errors": 0,
+      "warnings": 10
+    },
+    "release": {
+      "errors": 0,
+      "warnings": 10
+    }
+  },
+  "abi": "arm64-v8a",
+  "unsigned_apk_file": "DarsBridge-0.10-unsigned.apk",
+  "unsigned_apk_sha256": "c929a1139e684874280410463370d03846162a242eb2a99cc785dcdd23d16e9f",
+  "apksigner_jar_sha256": "3716d9311e55d2b0918a2fd9d54ba9e406c5f6abeea700b287f11259bc163dec",
+  "expected_release_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "stage": "SIGNED_RELEASE_VERIFIED_PHONE_TEST_PENDING",
+  "phone_validation": "Pending user installation; 0.9 remains the working reference",
+  "limits": [
+    "Not Tor Browser; no OS kill switch or universal no-leak guarantee",
+    "Upgrade test uses a disposable CI key on a non-debuggable release variant; production key never enters CI",
+    "Migration from 0.9 requires its local JSON backup; website sessions and route selection are not imported"
+  ],
+  "apk_sha256": "b166c829dade1fdb7514ba5e1f40d01e60f84d860085bd35069b5366c13be8db",
+  "apk_bytes": 34436180,
+  "signing": {
+    "kind": "persistent private release key",
+    "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "v2_verified": true,
+    "v3_verified": true,
+    "private_key_in_ci": false
+  },
+  "payload_entries_verified_unchanged": 73
+}
