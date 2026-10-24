@@ -155,6 +155,18 @@ public class NetworkSafetyTest {
             scenario.onActivity(a->call(a,"stopConnection"));
         }
     }
+    @Test public void newAddressWhileRouteIsPreparingLoadsOnlyLatestRequest()throws Exception {
+        try(Socks proxy=new Socks();ActivityScenario<MainActivity> scenario=ActivityScenario.launch(MainActivity.class)){
+            localMode(scenario,proxy.port());
+            scenario.onActivity(a->{
+                invoke(a,"navigate",new Class<?>[]{String.class},"https://darsbridge-old.invalid/");
+                invoke(a,"navigate",new Class<?>[]{String.class},"https://darsbridge-new.invalid/");
+            });
+            await("latest pending address",()->proxy.hosts.contains("darsbridge-new.invalid"));
+            assertFalse(proxy.hosts.contains("darsbridge-old.invalid"));
+            scenario.onActivity(a->call(a,"stopConnection"));
+        }
+    }
     @Test public void manualStopCancelsPendingRecoveryAndBlocksWorkers()throws Exception {
         try(Socks proxy=new Socks();ActivityScenario<MainActivity> scenario=ActivityScenario.launch(MainActivity.class)){
             localMode(scenario,proxy.port());fixture(scenario,"<script>window.fixture=true</script>",new AtomicInteger());

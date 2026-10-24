@@ -399,7 +399,7 @@ public class MainActivity extends Activity {
         recovering=true;
         prepareRoute(()->{
             recovering=false;
-            if(pendingUrl!=null){String requested=pendingUrl;pendingUrl=null;showWeb();web.loadUrl(requested);}
+            if(pendingUrl!=null)loadPendingUrl();
             else detail("مسیر دوباره آماده شد؛ اگر صفحه ادامه نداد، تازه‌سازی را بزنید.");
         });
     }
@@ -479,7 +479,7 @@ public class MainActivity extends Activity {
                         changing=false;route=ConnectionPolicy.Route.BLOCKED;refreshRouteText();detail("VPN هنگام تنظیم مسیر قطع شد؛ دوباره تلاش کنید.");return;
                     }
                     if(route!=choice){verification="";verifiedAt=0;}
-                    changing=false;route=choice;networkAllowed=true;blockWorkers(false);web.getSettings().setBlockNetworkLoads(false);
+                    changing=false;recovering=false;route=choice;networkAllowed=true;blockWorkers(false);web.getSettings().setBlockNetworkLoads(false);
                     routeApplied=true;appliedMode=mode;appliedNetwork=requestedNetwork;
                     appliedPort=choice==ConnectionPolicy.Route.INTERNAL?embedded.port():choice==ConnectionPolicy.Route.SOCKS?socksPort:-1;
                     refreshRouteText();detail("مسیر آماده است. تأیید Tor نیاز به آزمایش جداگانه دارد.");next.run();
@@ -502,7 +502,11 @@ public class MainActivity extends Activity {
         userConnectionRequest();pendingUrl=link;address.setText(link);
         InputMethodManager keyboard=(InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         if(keyboard!=null)keyboard.hideSoftInputFromWindow(address.getWindowToken(),0);
-        prepareRoute(()->{pendingUrl=null;showWeb();web.loadUrl(link);});
+        prepareRoute(this::loadPendingUrl);
+    }
+    private void loadPendingUrl(){
+        if(pendingUrl==null || !networkAllowed || !visible)return;
+        String requested=pendingUrl;pendingUrl=null;showWeb();web.loadUrl(requested);
     }
     private void refreshPage(){
         // Keep the existing history entry and reuse the already established route.
