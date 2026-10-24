@@ -1,0 +1,31 @@
+{
+  "version": "0.11.0",
+  "stage": "IMPLEMENTED_CI_PENDING",
+  "checked_date_tehran": "2026-10-24",
+  "branch": "darsbridge-v011",
+  "baseline_branch": "darsbridge-v010",
+  "baseline_code_sha": "e39650a2778a531226d8b214f9ba76658cac3944",
+  "baseline_phone": "User confirmed 0.10 installed and working",
+  "application_id": "com.darsbridge.browser",
+  "version_code": 11,
+  "expected_release_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "private_key_in_repository": false,
+  "private_key_in_ci": false,
+  "apk_produced": false,
+  "phone_test": "PENDING_USER",
+  "features": [
+    "Short Persian guidance for ordinary phone tests",
+    "Local allow-listed connection snapshot with explicit clipboard copy",
+    "No URLs, IPs, SSIDs, saved content or raw errors in the status report"
+  ],
+  "next_steps": [
+    "Run unit, lint, Android and real 0.10-to-0.11 source upgrade checks",
+    "Sign ARM64 production APK with unchanged persistent 0.10 key and verify certificate",
+    "Deliver APK as an in-place update with simple user instructions"
+  ],
+  "known_limitations": [
+    "No new bridge or guaranteed speed improvement",
+    "Not Tor Browser; no universal no-leak guarantee",
+    "Local report is a snapshot, not a network health measurement"
+  ]
+}
