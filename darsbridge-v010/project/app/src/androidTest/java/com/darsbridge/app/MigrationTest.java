@@ -91,6 +91,23 @@ public class MigrationTest {
         input.getJSONObject("settings").put("autoReconnect","true");
         try{BackupData.parse(input.toString());fail();}catch(IllegalArgumentException expected){}
     }
+    @Test public void multipleStoreInstancesDoNotLoseConcurrentAdds()throws Exception{
+        Fixture f=new Fixture();PageStore first=new PageStore(f.context),second=new PageStore(f.context);
+        java.util.concurrent.ExecutorService pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+        java.util.concurrent.CountDownLatch start=new java.util.concurrent.CountDownLatch(1);
+        java.util.List<java.util.concurrent.Future<?>> futures=new java.util.ArrayList<>();
+        try{
+            for(int n=0;n<2;n++){
+                final int writer=n;final PageStore target=n==0?first:second;
+                futures.add(pool.submit(()->{
+                    try{start.await();for(int i=0;i<8;i++)target.add("هم‌زمان","https://example.org/concurrent-"+writer+"-"+i,"محفوظ");}
+                    catch(Exception e){throw new RuntimeException(e);}
+                }));
+            }
+            start.countDown();for(java.util.concurrent.Future<?> future:futures)future.get(10,java.util.concurrent.TimeUnit.SECONDS);
+            assertEquals(16,f.store.read().length());
+        }finally{pool.shutdownNow();}
+    }
     @Test public void legacyFileImportThroughUiMergesWithoutRemovingExistingData()throws Exception{
         Context app=InstrumentationRegistry.getInstrumentation().getTargetContext();
         PageStore store=new PageStore(app);JSONArray before=store.read();

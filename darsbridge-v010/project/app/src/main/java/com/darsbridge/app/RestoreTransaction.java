@@ -22,23 +22,29 @@ final class RestoreTransaction {
         });
     }
     RestoreTransaction(File file,Sink sink){this.journal=new AtomicFile(file);this.sink=sink;}
-    synchronized boolean pending(){
-        File file=journal.getBaseFile();
-        return file.exists() || new File(file.getPath()+".bak").exists();
+    boolean pending(){
+        synchronized(PageStore.DATA_LOCK){
+            File file=journal.getBaseFile();
+            return file.exists() || new File(file.getPath()+".bak").exists();
+        }
     }
-    synchronized void restore(BackupData data)throws Exception{
-        if(pending())throw new IOException("ابتدا بازیابی معلق قبلی را تکمیل یا لغو کنید.");
-        String encoded=BackupData.encode(data.pages,data.marks,data.autoReconnect);
-        byte[] bytes=encoded.getBytes(StandardCharsets.UTF_8);
-        FileOutputStream out=null;
-        try{out=journal.startWrite();out.write(bytes);journal.finishWrite(out);}
-        catch(Exception e){if(out!=null)journal.failWrite(out);throw e;}
-        apply(BackupData.parse(encoded));
+    void restore(BackupData data)throws Exception{
+        synchronized(PageStore.DATA_LOCK){
+            if(pending())throw new IOException("ابتدا بازیابی معلق قبلی را تکمیل یا لغو کنید.");
+            String encoded=BackupData.encode(data.pages,data.marks,data.autoReconnect);
+            byte[] bytes=encoded.getBytes(StandardCharsets.UTF_8);
+            FileOutputStream out=null;
+            try{out=journal.startWrite();out.write(bytes);journal.finishWrite(out);}
+            catch(Exception e){if(out!=null)journal.failWrite(out);throw e;}
+            apply(BackupData.parse(encoded));
+        }
     }
-    synchronized boolean recover()throws Exception{
-        if(!pending())return false;
-        try(InputStream input=journal.openRead()){
-            apply(BackupData.parse(readBounded(input)));return true;
+    boolean recover()throws Exception{
+        synchronized(PageStore.DATA_LOCK){
+            if(!pending())return false;
+            try(InputStream input=journal.openRead()){
+                apply(BackupData.parse(readBounded(input)));return true;
+            }
         }
     }
     private void apply(BackupData data)throws Exception{
@@ -46,7 +52,9 @@ final class RestoreTransaction {
         journal.delete();
         if(pending())throw new IOException("ثبت پایان بازیابی کامل نشد.");
     }
-    synchronized void discardPending(){journal.delete();}
+    void discardPending(){
+        synchronized(PageStore.DATA_LOCK){journal.delete();}
+    }
     static String readBounded(InputStream input)throws IOException{
         ByteArrayOutputStream bytes=new ByteArrayOutputStream();byte[] buffer=new byte[8192];int n;
         while((n=input.read(buffer))!=-1){

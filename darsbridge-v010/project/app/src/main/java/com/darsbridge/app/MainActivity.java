@@ -90,7 +90,8 @@ public class MainActivity extends Activity {
     private ConnectionPolicy.Route route=ConnectionPolicy.Route.BLOCKED;
     private ConnectivityManager connectivity;
     private ConnectivityManager.NetworkCallback networkCallback;
-    private boolean changing=false, alive=true, pageFailed=false, returnFromOrbot=false, probeActive=false;
+    private volatile boolean alive=true;
+    private boolean changing=false, pageFailed=false, returnFromOrbot=false, probeActive=false;
     private volatile boolean networkAllowed=false;
     private int routeEpoch=0, probeEpoch=0, socksPort=9050;
     private String pendingUrl=null, networkKey="", exportText="", verification="";
@@ -831,12 +832,16 @@ public class MainActivity extends Activity {
         if(!canChangeLibrary())return;restoreBusy=true;
         worker.execute(()->{
             try{
-                BackupData target=incoming;
-                if(!replace){
-                    BackupData current=BackupData.parse(BackupData.encode(store.read(),new HashSet<>(prefs().getStringSet("marks",Collections.emptySet())),prefs().getBoolean("autoReconnect",true)));
-                    target=BackupData.merge(current,incoming);
+                synchronized(PageStore.DATA_LOCK){
+                    if(!alive || Thread.currentThread().isInterrupted())return;
+                    BackupData target=incoming;
+                    if(!replace){
+                        BackupData current=BackupData.parse(BackupData.encode(store.read(),new HashSet<>(prefs().getStringSet("marks",Collections.emptySet())),prefs().getBoolean("autoReconnect",true)));
+                        target=BackupData.merge(current,incoming);
+                    }
+                    if(!alive || Thread.currentThread().isInterrupted())return;
+                    restore.restore(target);
                 }
-                restore.restore(target);
                 ui.post(()->{
                     if(!alive)return;restoreBusy=false;restoreBlocked=false;
                     autoReconnect=prefs().getBoolean("autoReconnect",true);if(!autoReconnect)cancelRecovery();

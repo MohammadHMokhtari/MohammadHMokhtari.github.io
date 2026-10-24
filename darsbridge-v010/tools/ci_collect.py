@@ -17,7 +17,7 @@ def totals(pattern):
     return result
 unit=totals("test-results/testDebugUnitTest/TEST-*.xml")
 android=totals("outputs/androidTest-results/connected/debug/TEST-*.xml")
-assert unit["tests"]>=71 and android["tests"]>=27,(unit,android)
+assert unit["tests"]>=71 and android["tests"]>=28,(unit,android)
 lint={}
 for variant in ("debug","release"):
     text=(build/f"reports/lint-results-{variant}.txt").read_text()
