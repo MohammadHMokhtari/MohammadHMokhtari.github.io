@@ -1,6 +1,6 @@
 {
   "version": "0.9",
-  "stage": "IMPLEMENTED_CI_PENDING",
+  "stage": "APK_BUILT_CI_PASS_PHONE_TEST_PENDING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v09",
   "baseline_branch": "darsbridge-v08",
@@ -18,17 +18,52 @@
   },
   "baseline_source_artifact_match_files": 27,
   "implementation_started": true,
-  "v09_apk_produced": false,
-  "v09_ci": "PENDING",
+  "v09_apk_produced": true,
+  "v09_ci": {
+    "run_id": 40043740513,
+    "url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40043740513",
+    "conclusion": "success",
+    "unit": {
+      "tests": 71,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "android": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 11
+    }
+  },
   "next_steps": [
-    "Run unit/lint/build and Android emulator CI",
-    "Inspect actual reports and fix failures",
-    "Deliver signed ARM64 debug APK and phone test guide"
+    "User phone test: internal Snowflake, Tor exit, search, YouTube/fullscreen",
+    "User phone test: Wi-Fi/mobile switch, foreground return, manual stop, backups",
+    "Design stable signing key and upgrade data migration before stable release"
   ],
   "known_limitations": [
-    "No new phone test in this review",
-    "No measured DNS/WebRTC leak coverage in 0.8",
-    "No full anonymity or OS kill-switch guarantee",
-    "Stable release signing and migration remain to be designed"
+    "Not Tor Browser",
+    "No OS kill switch or universal no-leak guarantee",
+    "DNS evidence is SOCKS hostname handoff, not a packet capture of all DNS",
+    "WebRTC guard is defense in depth; only named document cases were tested",
+    "Established sockets, all provider traffic and real-world Tor throughput are not fully measured"
+  ],
+  "code_sha": "615f9541e24ad1b6f3dd3dcb22dea793038d9c1b",
+  "apk_sha256": "86b4f0e8c51c985bddf899570031365244cea1cc41601589a0f7c4f55c561d78",
+  "apk_bytes": 35104243,
+  "source_artifact_matches_project_files": 35,
+  "phone_test": "PENDING_USER",
+  "changes": [
+    "Independent readable source",
+    "Run/network/foreground-scoped circuit health plus Tor network-liveness",
+    "Generation-filtered Snowflake events; per-connection stop does not kill listener",
+    "Serialized global proxy mutations; outdated callbacks cannot enable requests",
+    "Bounded recovery without automatic form replay",
+    "Document-start WebRTC defense in depth",
+    "Controlled HTTPS/WebSocket, SOCKS domain-handoff and UDP STUN observation tests"
   ]
 }

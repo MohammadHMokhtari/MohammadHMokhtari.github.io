@@ -1,0 +1,32 @@
+{
+  "version": "0.9.0",
+  "code_sha": "615f9541e24ad1b6f3dd3dcb22dea793038d9c1b",
+  "run_url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40043740513",
+  "unit": {
+    "tests": 71,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android": {
+    "tests": 18,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 11
+  },
+  "apk_sha256": "86b4f0e8c51c985bddf899570031365244cea1cc41601589a0f7c4f55c561d78",
+  "abi": "arm64-v8a",
+  "signing": "debug; separate app id; not a stable release key",
+  "phone_validation": "Pending user test; CI cannot validate the user's internet",
+  "limits": [
+    "Not Tor Browser",
+    "No OS kill switch or universal no-leak guarantee",
+    "DNS evidence is SOCKS hostname handoff, not a packet capture of all DNS",
+    "WebRTC guard is defense in depth; only named document cases were tested",
+    "Established sockets, all provider traffic and real-world Tor throughput are not fully measured"
+  ]
+}
