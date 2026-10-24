@@ -1,6 +1,6 @@
 {
   "version": "0.10.0",
-  "stage": "SIGNED_RELEASE_CI_PASS_PHONE_TEST_PENDING",
+  "stage": "SIGNED_RELEASE_CI_PASS_USER_CONFIRMED_WORKING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v010",
   "baseline_branch": "darsbridge-v09",
@@ -39,12 +39,12 @@
     }
   },
   "apk_produced": true,
-  "phone_test": "PENDING_USER",
+  "phone_test": "USER_CONFIRMED_INSTALLED_AND_WORKING",
   "next_steps": [
-    "Install 0.10 alongside working 0.9; keep 0.9 until migration is checked",
-    "Export 0.9 JSON backup and import with merge; verify bookmarks and offline Persian text",
-    "Test internal Snowflake, Tor exit, search, YouTube/fullscreen and network transitions on user phone",
-    "Future releases must reuse fixed application ID, preference namespace and private signing key with increasing versionCode"
+    "Use 0.10 as the phone-confirmed baseline for 0.11",
+    "Add plain Persian in-app test guidance and a privacy-limited local status report",
+    "Verify update from 0.10 to 0.11 preserves data; reuse permanent identity and signing key",
+    "Keep 0.9 until any legacy bookmarks and offline texts have been migrated and checked"
   ],
   "known_limitations": [
     "Initial install is separate from 0.9; JSON backup required for legacy data",
@@ -65,5 +65,7 @@
   "upgrade_data_hash_preserved": true,
   "source_artifact_match_files": 48,
   "payload_entries_verified_unchanged": 73,
-  "private_signing_recovery_preserved": true
+  "private_signing_recovery_preserved": true,
+  "phone_feedback_fa": "این برنامه اخر هم تست مثبت بود و درست کار کرد",
+  "phone_validation_scope": "General installation and normal operation confirmed; individual migration, media and network-transition scenarios not separately reported."
 }
