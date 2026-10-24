@@ -1,6 +1,6 @@
 {
   "version": "0.9",
-  "stage": "APK_BUILT_CI_PASS_PHONE_TEST_PENDING",
+  "stage": "CI_PASS_USER_CONFIRMED_WORKING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v09",
   "baseline_branch": "darsbridge-v08",
@@ -41,9 +41,10 @@
     }
   },
   "next_steps": [
-    "User phone test: internal Snowflake, Tor exit, search, YouTube/fullscreen",
-    "User phone test: Wi-Fi/mobile switch, foreground return, manual stop, backups",
-    "Design stable signing key and upgrade data migration before stable release"
+    "Plan 0.10: stable signing, fixed application identity and backup-based migration path",
+    "Complete targeted phone checks for network changes, background return, manual stop and backups",
+    "Improve user-controlled local connection diagnostics",
+    "Evaluate alternative bridges and browser features after update and recovery foundations are ready"
   ],
   "known_limitations": [
     "Not Tor Browser",
@@ -56,7 +57,7 @@
   "apk_sha256": "86b4f0e8c51c985bddf899570031365244cea1cc41601589a0f7c4f55c561d78",
   "apk_bytes": 35104243,
   "source_artifact_matches_project_files": 35,
-  "phone_test": "PENDING_USER",
+  "phone_test": "USER_CONFIRMED_INSTALLED_AND_WORKING",
   "changes": [
     "Independent readable source",
     "Run/network/foreground-scoped circuit health plus Tor network-liveness",
@@ -65,5 +66,11 @@
     "Bounded recovery without automatic form replay",
     "Document-start WebRTC defense in depth",
     "Controlled HTTPS/WebSocket, SOCKS domain-handoff and UDP STUN observation tests"
-  ]
+  ],
+  "phone_validation": {
+    "reported_date_tehran": "2026-10-24",
+    "user_feedback_fa": "نصب شد خیلی خوب کار می‌کند",
+    "scope": "General installation and working behavior confirmed by user; no independent remote phone control",
+    "targeted_scenarios": "Individual Wi-Fi/mobile, background return, stop, backup and media cases have not been separately reported"
+  }
 }
