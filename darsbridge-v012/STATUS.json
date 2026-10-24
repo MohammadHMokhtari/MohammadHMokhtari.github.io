@@ -1,22 +1,23 @@
 {
   "version_target": "0.12.0",
-  "stage": "INITIAL_FEASIBILITY_RECORDED_IMPLEMENTATION_NOT_STARTED",
+  "stage": "ISOLATED_NATIVE_PROBE_IMPLEMENTED_CI_PENDING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v012",
   "baseline_branch": "darsbridge-v011",
-  "baseline_head_sha": "b393d9462e2b4be7bdcd321dc1a0399a8e70b98f",
-  "last_phone_confirmed_version": "0.10.0",
-  "version_011_phone_test": "PENDING_USER",
+  "baseline_head_sha": "8648bec82680d2a387833225ed628f9b74b546ad",
+  "last_phone_confirmed_version": "0.11.0",
+  "version_011_phone_test": "USER_CONFIRMED_WORKING",
   "existing_dependency": "com.netzarchitekten:IPtProxy:5.7.0",
-  "candidate_transports": ["obfs4", "webtunnel"],
+  "candidate_transports": [
+    "obfs4",
+    "webtunnel"
+  ],
   "evidence": "Current upstream Controller documents start/port/stop support; exact shipped AAR bindings and Android execution still require verification",
   "upstream_controller_blob_sha": "8c21f29b71fefbda08bef02ff593a7ecda9ae212",
   "app_implementation_started": false,
-  "ci_started": false,
   "apk_produced": false,
   "phone_test": "NOT_APPLICABLE_NO_BUILD",
-  "active_background_job": false,
-  "next_step": "Verify obfs4 and webtunnel bindings and local SOCKS listeners in Android before integrating selection and bridge configuration",
+  "next_step": "Run isolated native probe, then integrate bridge selection and validated configuration only after it passes",
   "constraints": [
     "No silent direct fallback",
     "Preserve TLS validation",
@@ -26,5 +27,10 @@
     "Reuse permanent application identity, data paths and private release key",
     "No purchase or paid server required by the development plan",
     "Do not claim end-to-end connectivity from a local listener test"
-  ]
+  ],
+  "probe_implemented": true,
+  "production_apk_produced": false,
+  "ci": {
+    "status": "PENDING_RUN"
+  }
 }

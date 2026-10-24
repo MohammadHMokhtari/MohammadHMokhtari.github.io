@@ -1,0 +1,69 @@
+name: Probe DarsBridge 0.12 alternate transport bindings
+on:
+  push:
+    branches: [darsbridge-v012]
+    paths:
+      - darsbridge-v012/transport-probe/**
+      - darsbridge-v012/tools/**
+      - .github/workflows/probe-darsbridge-v012.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: darsbridge-v012-probe-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '24'
+      - uses: android-actions/setup-android@v4
+        with:
+          log-accepted-android-sdk-licenses: false
+      - name: Install SDK
+        run: sdkmanager --channel=3 'platforms;android-37.2' 'build-tools;36.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+      - name: Compile exact shipped bindings and lint isolated fixture
+        run: gradle -p darsbridge-v012/transport-probe :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon --stacktrace
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise actual native transports on Android 16
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 2048M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: |
+            mkdir -p build-output/probe
+            adb install -t darsbridge-v012/transport-probe/app/build/outputs/apk/debug/app-debug.apk
+            adb install -t darsbridge-v012/transport-probe/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            adb shell am instrument -w -e class com.darsbridge.probe.TransportProbeTest com.darsbridge.transportprobe.test/androidx.test.runner.AndroidJUnitRunner > build-output/probe/instrumentation.txt
+            adb shell run-as com.darsbridge.transportprobe cat files/transport-probe.json > build-output/probe/transport-probe.json
+      - name: Require actual successful instrumentation and collect native evidence
+        run: python3 darsbridge-v012/tools/collect_probe.py
+      - name: Upload probe evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarsBridge-0.12-Native-Probe
+          path: |
+            build-output/probe/
+            darsbridge-v012/transport-probe/app/build/reports/lint-results-debug.*
+          if-no-files-found: error
+          retention-days: 14
