@@ -1,6 +1,6 @@
 {
   "version_target": "0.12.0",
-  "stage": "ISOLATED_NATIVE_PROBE_IMPLEMENTED_CI_PENDING",
+  "stage": "NATIVE_LOCAL_PROBE_PASSED_BROWSER_INTEGRATION_PENDING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v012",
   "baseline_branch": "darsbridge-v011",
@@ -12,12 +12,12 @@
     "obfs4",
     "webtunnel"
   ],
-  "evidence": "Current upstream Controller documents start/port/stop support; exact shipped AAR bindings and Android execution still require verification",
+  "evidence": "Exact shipped AAR compiled and ran on Android 16 x86_64; obfs4 and webtunnel loopback SOCKS5 listeners, stop, restart and unknown-method rejection passed. No bridge CONNECT or Tor circuit tested.",
   "upstream_controller_blob_sha": "8c21f29b71fefbda08bef02ff593a7ecda9ae212",
   "app_implementation_started": false,
   "apk_produced": false,
-  "phone_test": "NOT_APPLICABLE_NO_BUILD",
-  "next_step": "Run isolated native probe, then integrate bridge selection and validated configuration only after it passes",
+  "phone_test": "NOT_APPLICABLE_NO_BROWSER_BUILD",
+  "next_step": "Integrate a coordinated native-controller lifecycle, explicit bridge selection and strictly validated bridge configuration into a separate 0.12 browser project; then run full regression and 0.11-to-0.12 upgrade checks before release",
   "constraints": [
     "No silent direct fallback",
     "Preserve TLS validation",
@@ -31,6 +31,19 @@
   "probe_implemented": true,
   "production_apk_produced": false,
   "ci": {
-    "status": "PENDING_RUN"
-  }
+    "run_id": 40108761155,
+    "url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40108761155",
+    "status": "COMPLETED",
+    "conclusion": "success",
+    "instrumentation_tests": 3,
+    "lint": {
+      "errors": 0,
+      "warnings": 5
+    }
+  },
+  "code_sha": "72e430647477f935b76d23ae8d885cb66caace36",
+  "native_local_probe_passed": true,
+  "browser_integration_started": false,
+  "aar_sha256": "567130d6760c64f823c62150d9da7978d6f8d8ef8766e2a5b4f8eb5cdaba5b51",
+  "runtime_abi": "x86_64"
 }

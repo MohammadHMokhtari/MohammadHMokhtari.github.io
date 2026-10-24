@@ -1,0 +1,65 @@
+{
+  "fixture_application_id": "com.darsbridge.transportprobe",
+  "dependency": "com.netzarchitekten:IPtProxy:5.7.0",
+  "lyrebird_version": "lyrebird-0.9.0",
+  "android_api": 36,
+  "runtime_abi": "x86_64",
+  "controller_instances": 1,
+  "results": [
+    {
+      "transport": "obfs4-restart-and-invalid-method",
+      "loopback_only": true,
+      "socks5_negotiated": true,
+      "listener_closed_on_stop": true,
+      "restart_verified": true,
+      "unknown_transport_rejected": true,
+      "socks_connect_requests_sent": 0,
+      "passed": true
+    },
+    {
+      "transport": "obfs4",
+      "loopback_only": true,
+      "socks5_negotiated": true,
+      "listener_closed_on_stop": true,
+      "restart_verified": false,
+      "unknown_transport_rejected": false,
+      "socks_connect_requests_sent": 0,
+      "passed": true
+    },
+    {
+      "transport": "webtunnel",
+      "loopback_only": true,
+      "socks5_negotiated": true,
+      "listener_closed_on_stop": true,
+      "restart_verified": false,
+      "unknown_transport_rejected": false,
+      "socks_connect_requests_sent": 0,
+      "passed": true
+    }
+  ],
+  "all_assertions_reached": true,
+  "tor_end_to_end_tested": false,
+  "production_browser_modified": false,
+  "stage": "NATIVE_LOCAL_PROBE_PASSED_BROWSER_INTEGRATION_PENDING",
+  "code_sha": "72e430647477f935b76d23ae8d885cb66caace36",
+  "run_url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40108761155",
+  "instrumentation_tests": 3,
+  "lint": {
+    "errors": 0,
+    "warnings": 5
+  },
+  "aar_sha256": "567130d6760c64f823c62150d9da7978d6f8d8ef8766e2a5b4f8eb5cdaba5b51",
+  "native_library_sha256": {
+    "jni/armeabi-v7a/libgojni.so": "dd6282dc71f1fb72397ab6a8638d90379fb328b7f0d20cf1873a0dd6d744258b",
+    "jni/arm64-v8a/libgojni.so": "f32599d18cad6b51485374d7d54ba9e8f7a9c26f9c86e17acc8a58b151a2f1ad",
+    "jni/x86/libgojni.so": "6562f51ea315e7e6f0d19dfab3e60f25366499133c2ef3c80d3333fbc6b0b428",
+    "jni/x86_64/libgojni.so": "75dcefe9c4ee44da9fff5242e99831ae09785b8ef1bd0f852f6d8c40bfc86e59"
+  },
+  "phone_tested": false,
+  "production_apk_produced": false,
+  "limitations": [
+    "Only loopback listeners and SOCKS5 negotiation were exercised",
+    "No bridge address, external SOCKS CONNECT, Tor circuit or user network was tested",
+    "ARM64 library presence and checksum are recorded; execution was on the stated emulator ABI"
+  ]
+}
