@@ -1,49 +1,44 @@
 {
-  "version_target": "0.12.0",
-  "stage": "NATIVE_LOCAL_PROBE_PASSED_BROWSER_INTEGRATION_PENDING",
+  "version": "0.12.0",
+  "version_code": 12,
+  "stage": "DIRECT_IP_SCANNER_IMPLEMENTED_CI_PENDING",
   "checked_date_tehran": "2026-10-24",
   "branch": "darsbridge-v012",
   "baseline_branch": "darsbridge-v011",
   "baseline_head_sha": "8648bec82680d2a387833225ed628f9b74b546ad",
-  "last_phone_confirmed_version": "0.11.0",
-  "version_011_phone_test": "USER_CONFIRMED_WORKING",
-  "existing_dependency": "com.netzarchitekten:IPtProxy:5.7.0",
-  "candidate_transports": [
-    "obfs4",
-    "webtunnel"
+  "baseline_code_sha": "c40348da44183ec56069d0ee9c4cb7158d93b859",
+  "baseline_phone": "USER_CONFIRMED_WORKING",
+  "application_id": "com.darsbridge.browser",
+  "expected_release_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "features": [
+    "Explicit direct IPv4 candidate search without Tor/Snowflake",
+    "Separate TCP-only and identity-verified HTTPS results",
+    "Offline presets, bounded CIDR samples and retested local success cache",
+    "Cancellation on dismissal/background/network change; no browser route change"
   ],
-  "evidence": "Exact shipped AAR compiled and ran on Android 16 x86_64; obfs4 and webtunnel loopback SOCKS5 listeners, stop, restart and unknown-method rejection passed. No bridge CONNECT or Tor circuit tested.",
-  "upstream_controller_blob_sha": "8c21f29b71fefbda08bef02ff593a7ecda9ae212",
-  "app_implementation_started": false,
-  "apk_produced": false,
-  "phone_test": "NOT_APPLICABLE_NO_BROWSER_BUILD",
-  "next_step": "Integrate a coordinated native-controller lifecycle, explicit bridge selection and strictly validated bridge configuration into a separate 0.12 browser project; then run full regression and 0.11-to-0.12 upgrade checks before release",
-  "constraints": [
-    "No silent direct fallback",
-    "Preserve TLS validation",
-    "Single coordinated native Controller lifecycle",
-    "Strict bridge input validation; no raw torrc injection",
-    "Keep private bridge addresses out of status reports",
-    "Reuse permanent application identity, data paths and private release key",
-    "No purchase or paid server required by the development plan",
-    "Do not claim end-to-end connectivity from a local listener test"
-  ],
-  "probe_implemented": true,
-  "production_apk_produced": false,
   "ci": {
-    "run_id": 40108761155,
-    "url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40108761155",
-    "status": "COMPLETED",
-    "conclusion": "success",
-    "instrumentation_tests": 3,
-    "lint": {
-      "errors": 0,
-      "warnings": 5
-    }
+    "status": "PENDING_RUN"
   },
-  "code_sha": "72e430647477f935b76d23ae8d885cb66caace36",
-  "native_local_probe_passed": true,
-  "browser_integration_started": false,
-  "aar_sha256": "567130d6760c64f823c62150d9da7978d6f8d8ef8766e2a5b4f8eb5cdaba5b51",
-  "runtime_abi": "x86_64"
+  "apk_produced": false,
+  "phone_test": "PENDING_USER",
+  "native_probe": {
+    "conclusion": "success",
+    "run_id": 40108761155,
+    "code_sha": "72e430647477f935b76d23ae8d885cb66caace36",
+    "tests": 3,
+    "scope": "Local obfs4/WebTunnel native listeners; not integrated into browser"
+  },
+  "alternate_transports_integrated": false,
+  "known_limitations": [
+    "Not a general proxy or guaranteed Internet gateway",
+    "IPv4 only; large ranges are sampled, not exhaustively scanned",
+    "An HTTP status does not prove full site, video or other-host availability",
+    "No routing of browser traffic through discovered IPs in this version",
+    "A complete disconnection or source-access whitelist is not bypassed by address search"
+  ],
+  "next_steps": [
+    "Complete build, unit, Android, TLS validation, cancellation and 0.11-to-0.12 upgrade checks",
+    "Sign ARM64 release with unchanged private key outside CI",
+    "Deliver scanner and explain results in a short phone test"
+  ]
 }
