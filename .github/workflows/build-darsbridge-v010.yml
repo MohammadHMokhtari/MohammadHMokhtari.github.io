@@ -66,7 +66,7 @@ jobs:
             adb shell am instrument -w -e class 'com.darsbridge.app.ReleaseUpgradeTest#verify' com.darsbridge.browser.upgradetest/androidx.test.runner.AndroidJUnitRunner > build-output/upgrade-verify.txt
             python3 darsbridge-v010/tools/verify_upgrade.py
             adb shell cmd uimode night yes
-            adb shell am start -W -n com.darsbridge.browser.qa/com.darsbridge.app.MainActivity
+            adb shell am start -W -n com.darsbridge.browser/com.darsbridge.app.MainActivity
             sleep 3
             adb exec-out screencap -p > build-output/home-dark.png
             adb shell cmd uimode night no
