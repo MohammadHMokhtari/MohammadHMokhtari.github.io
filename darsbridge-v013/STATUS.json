@@ -1,0 +1,14 @@
+{
+  "version": "0.13.0",
+  "version_code": 13,
+  "stage": "IMPLEMENTED_CI_PENDING",
+  "baseline": "ed3c582b772f98b6f4ab003733fb98666b058bcb",
+  "baseline_phone_validation": "User reports app working very well over several days",
+  "features": [
+    "8 independent tabs and persistent URL/title session",
+    "Searchable local 200 URL history including SPA chat routes",
+    "Remember explicit connection across app relaunch, honoring manual stop and autoReconnect setting"
+  ],
+  "phone_validation": "pending",
+  "signed_apk": "pending"
+}

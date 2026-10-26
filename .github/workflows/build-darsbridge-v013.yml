@@ -1,0 +1,153 @@
+name: Build and test DarsBridge 0.13
+on:
+  push:
+    branches: [darsbridge-v013]
+    paths:
+      - darsbridge-v013/project/**
+      - darsbridge-v013/release-tools/**
+      - darsbridge-v013/signing/**
+      - .github/workflows/build-darsbridge-v013.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: darsbridge-v013-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout the exact tested 0.12 baseline for a real source-to-source update
+        uses: actions/checkout@v4
+        with:
+          ref: ed3c582b772f98b6f4ab003733fb98666b058bcb
+          path: baseline-v012
+          persist-credentials: false
+      - name: Verify public source contains no private signing material
+        run: python3 darsbridge-v013/release-tools/verify_public_sources.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '24'
+      - uses: android-actions/setup-android@v4
+        with:
+          log-accepted-android-sdk-licenses: false
+      - name: Install SDK
+        run: sdkmanager --channel=3 'platforms;android-37.2' 'build-tools;36.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+      - name: Generate disposable local HTTPS fixture for Android tests
+        run: |
+          mkdir -p darsbridge-v013/project/app/build/generated/ipTestAssets
+          keytool -J-Dkeystore.pkcs12.legacy -genkeypair -noprompt -storetype PKCS12 -keystore darsbridge-v013/project/app/build/generated/ipTestAssets/scan-test.p12 -storepass android -keypass android -alias local-https-fixture -keyalg RSA -keysize 2048 -validity 3 -startdate -1d -dname "CN=scan.darsbridge.invalid" -ext "SAN=dns:scan.darsbridge.invalid"
+      - name: Unit tests and debug and release lint
+        run: gradle -p darsbridge-v013/project :app:testDebugUnitTest :app:lintDebug :app:lintRelease :app:assembleDebug --no-daemon --stacktrace
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android 16 regression, migration and real release upgrade tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 2048M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: |
+            gradle -p darsbridge-v013/project :app:connectedDebugAndroidTest --no-daemon --stacktrace
+            mkdir -p build-output
+            keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/darsbridge-ci-upgrade.p12" -storetype PKCS12 -storepass android -keypass android -alias upgrade-qa -keyalg RSA -keysize 2048 -validity 2 -dname "CN=Disposable CI upgrade test"
+            adb pull /sdcard/Download/DarsBridge-ip-scan.png build-output/ip-scan.png
+            adb pull /sdcard/Download/DarsBridge-tabs.png build-output/tabs.png
+            adb pull /sdcard/Download/DarsBridge-history.png build-output/history.png
+            adb pull /sdcard/Download/DarsBridge-help.png build-output/help.png
+            adb pull /sdcard/Download/DarsBridge-status.png build-output/status.png
+            cp darsbridge-v013/project/app/src/upgradeTest/java/com/darsbridge/app/ReleaseUpgradeTest.java baseline-v012/darsbridge-v012/project/app/src/upgradeTest/java/com/darsbridge/app/ReleaseUpgradeTest.java
+            gradle -p baseline-v012/darsbridge-v012/project :app:assembleRelease :app:assembleReleaseAndroidTest -PreleaseQa=true -PciKeyStore="$RUNNER_TEMP/darsbridge-ci-upgrade.p12" -PupgradeVersionCode=12 --no-daemon --stacktrace
+            "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$RUNNER_TEMP/darsbridge-ci-upgrade.p12" --ks-key-alias upgrade-qa --ks-pass pass:android --key-pass pass:android --out build-output/upgrade-tests-before.apk baseline-v012/darsbridge-v012/project/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
+            "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging baseline-v012/darsbridge-v012/project/app/build/outputs/apk/release/app-release.apk > build-output/baseline-badging.txt
+            adb install -t baseline-v012/darsbridge-v012/project/app/build/outputs/apk/release/app-release.apk
+            adb install -t build-output/upgrade-tests-before.apk
+            adb shell am instrument -w -e class 'com.darsbridge.app.ReleaseUpgradeTest#seed' com.darsbridge.browser.upgradetest/androidx.test.runner.AndroidJUnitRunner > build-output/upgrade-seed.txt
+            gradle -p darsbridge-v013/project :app:assembleRelease :app:assembleReleaseAndroidTest -PreleaseQa=true -PciKeyStore="$RUNNER_TEMP/darsbridge-ci-upgrade.p12" -PupgradeVersionCode=13 --no-daemon --stacktrace
+            "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$RUNNER_TEMP/darsbridge-ci-upgrade.p12" --ks-key-alias upgrade-qa --ks-pass pass:android --key-pass pass:android --out build-output/upgrade-tests-after.apk darsbridge-v013/project/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
+            adb install -r -t darsbridge-v013/project/app/build/outputs/apk/release/app-release.apk
+            adb install -r -t build-output/upgrade-tests-after.apk
+            adb shell am instrument -w -e class 'com.darsbridge.app.ReleaseUpgradeTest#verify' com.darsbridge.browser.upgradetest/androidx.test.runner.AndroidJUnitRunner > build-output/upgrade-verify.txt
+            python3 darsbridge-v013/release-tools/verify_upgrade.py
+            adb shell cmd uimode night yes
+            adb shell am start -W -n com.darsbridge.browser/com.darsbridge.app.MainActivity
+            sleep 3
+            adb exec-out screencap -p > build-output/home-dark.png
+            adb shell cmd uimode night no
+            sleep 3
+            adb exec-out screencap -p > build-output/home-light.png
+      - name: Build unsigned non-debuggable ARM64 distribution input
+        run: |
+          gradle -p darsbridge-v013/project :app:assembleRelease -PphoneAbi=arm64-v8a --no-daemon --stacktrace
+          mkdir -p build-output
+          cp darsbridge-v013/project/app/build/outputs/apk/release/app-release-unsigned.apk build-output/DarsBridge-0.13-unsigned.apk
+          cp "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" build-output/apksigner.jar
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 build-output/DarsBridge-0.13-unsigned.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging build-output/DarsBridge-0.13-unsigned.apk > build-output/release-badging.txt
+      - name: Collect actual CI evidence and verify unsigned input
+        run: python3 darsbridge-v013/release-tools/ci_collect.py
+      - name: Archive public source
+        if: always()
+        run: |
+          mkdir -p build-output
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          root=Path('darsbridge-v013')
+          with ZipFile('build-output/DarsBridge-0.13-source.zip','w',ZIP_DEFLATED) as z:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file() and not any(s in ('build','.gradle','__pycache__','.kotlin') for s in p.relative_to(root).parts):
+                      assert p.suffix.lower() not in ('.p12','.jks','.keystore') and 'PRIVATE' not in p.name
+                      z.write(p,'DarsBridge-0.13/'+str(p.relative_to(root)))
+          PY
+      - name: Upload verified unsigned inputs for private signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarsBridge-0.13-Unsigned-Inputs
+          path: |
+            build-output/DarsBridge-0.13-unsigned.apk
+            build-output/apksigner.jar
+            build-output/RELEASE_INPUT.json
+            build-output/UPGRADE_PROOF.json
+            build-output/CI_REPORT_FA.md
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload QA reports and public source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarsBridge-0.13-QA
+          path: |
+            darsbridge-v013/project/app/build/reports/
+            darsbridge-v013/project/app/build/test-results/
+            darsbridge-v013/project/app/build/outputs/androidTest-results/
+            build-output/upgrade-seed.txt
+            build-output/upgrade-verify.txt
+            build-output/UPGRADE_PROOF.json
+            build-output/RELEASE_INPUT.json
+            build-output/CI_REPORT_FA.md
+            build-output/tabs.png
+            build-output/history.png
+            build-output/ip-scan.png
+            build-output/help.png
+            build-output/status.png
+            build-output/baseline-badging.txt
+            build-output/home-dark.png
+            build-output/home-light.png
+            build-output/DarsBridge-0.13-source.zip
+          retention-days: 14
