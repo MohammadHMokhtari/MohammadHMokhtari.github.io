@@ -78,6 +78,11 @@ final class BrowserStore {
         visits.removeIf(v->v.url.equals(valid));visits.add(0,new Visit(valid,title(title),Math.max(0,at)));
         while(visits.size()>MAX_HISTORY)visits.remove(visits.size()-1);
     }
+    void updateTitle(String url,String title){
+        for(int i=0;i<visits.size();i++){
+            Visit old=visits.get(i);if(old.url.equals(url)){visits.set(i,new Visit(old.url,title(title),old.at));return;}
+        }
+    }
     void removeVisit(String url){visits.removeIf(v->v.url.equals(url));}
     void clearHistory(){visits.clear();}
     void save()throws Exception{

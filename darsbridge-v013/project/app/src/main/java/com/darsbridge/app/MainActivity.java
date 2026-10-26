@@ -353,7 +353,8 @@ public class MainActivity extends Activity {
             @Override public void onProgressChanged(WebView v,int p){if(!active(tab))return;progress.setProgress(p);progress.setVisibility(p>=100 || tab.data.home?View.GONE:View.VISIBLE);}
             @Override public void onReceivedTitle(WebView v,String title){
                 if(!alive || !tabs.contains(tab) || !UrlTools.isHttps(v.getUrl()))return;
-                tab.data.title=BrowserStore.title(title);if(tab.finished && !tab.failed)recordVisit(tab,v.getUrl());
+                tab.data.title=BrowserStore.title(title);
+                if(tab.finished && !tab.failed){browser.updateTitle(tab.data.url,tab.data.title);saveSession();}
             }
             @Override public void onPermissionRequest(PermissionRequest r){r.deny();}
             @Override public void onGeolocationPermissionsShowPrompt(String origin,GeolocationPermissions.Callback callback){callback.invoke(origin,false,false);}
@@ -692,7 +693,7 @@ public class MainActivity extends Activity {
     }
     private void showBrowsingHistory(){
         LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);box.setPadding(dp(12),0,dp(12),0);
-        EditText filter=new EditText(this);filter.setSingleLine(true);filter.setHint("جست‌وجو در تاریخچه");filter.setTextColor(INK);filter.setHintTextColor(MUTED);box.addView(filter);
+        EditText filter=new EditText(this);filter.setSingleLine(true);filter.setHint("جست‌وجو در تاریخچه");filter.setContentDescription("جست‌وجو در تاریخچه");filter.setTextColor(INK);filter.setHintTextColor(MUTED);box.addView(filter);
         TextView hint=text("تا ۲۰۰ صفحهٔ اخیر، فقط روی همین گوشی. متن پیام‌های چت ذخیره نمی‌شود.",13,MUTED);box.addView(hint);
         ListView list=new ListView(this);box.addView(list,new LinearLayout.LayoutParams(-1,dp(300)));
         ArrayList<BrowserStore.Visit> shown=new ArrayList<>();ArrayList<String> labels=new ArrayList<>();

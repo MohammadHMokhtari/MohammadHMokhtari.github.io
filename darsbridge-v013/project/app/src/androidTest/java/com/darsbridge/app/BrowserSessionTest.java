@@ -156,13 +156,26 @@ public class BrowserSessionTest {
                 call(a,"saveSession");call(a,"showBrowsingHistory");
             });
             UiDevice device=UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-            java.util.List<androidx.test.uiautomator.UiObject2> edits=device.findObjects(androidx.test.uiautomator.By.clazz("android.widget.EditText"));
-            assertFalse(edits.isEmpty());androidx.test.uiautomator.UiObject2 input=edits.get(edits.size()-1);input.setText("219");
+            androidx.test.uiautomator.UiObject2 input=device.wait(androidx.test.uiautomator.Until.findObject(androidx.test.uiautomator.By.desc("جست‌وجو در تاریخچه")),5000);
+            assertNotNull(input);input.setText("219");
             androidx.test.uiautomator.UiObject2 item=device.wait(androidx.test.uiautomator.Until.findObject(androidx.test.uiautomator.By.textContains("آخرین عنوان")),5000);
             assertNotNull(item);device.executeShellCommand("screencap -p /sdcard/Download/DarsBridge-history.png");
             item.click();androidx.test.uiautomator.UiObject2 remove=device.wait(androidx.test.uiautomator.Until.findObject(androidx.test.uiautomator.By.text("حذف این مورد")),5000);
             assertNotNull(remove);remove.click();await("delete history row",()->new BrowserStore(context()).visits.size()==199);
             scenario.onActivity(a->call(a,"stopConnection"));
+        }
+    }
+    @Test public void latePageTitleCannotRestoreDeletedHistoryOrChangeVisitTime()throws Exception{
+        try(NetworkSafetyTest.Socks proxy=new NetworkSafetyTest.Socks();ActivityScenario<MainActivity> scenario=ActivityScenario.launch(MainActivity.class)){
+            scenario.onActivity(a->{local(a,proxy.port());fixture(a,new CopyOnWriteArrayList<>(),new AtomicInteger());open(a,"/forget");});loaded(scenario,"/forget");
+            scenario.onActivity(a->{store(a).clearHistory();call(a,"saveSession");});
+            js(scenario,"document.title='after deletion';true");
+            await("late title saved to tab",()->new BrowserStore(context()).tabs.get(0).title.equals("after deletion"));
+            assertTrue(new BrowserStore(context()).visits.isEmpty());
+            scenario.onActivity(a->{store(a).visit(ORIGIN+"/forget","old title",123);call(a,"saveSession");});
+            js(scenario,"document.title='updated title';true");
+            await("existing history title updated",()->new BrowserStore(context()).visits.get(0).title.equals("updated title"));
+            assertEquals(123,new BrowserStore(context()).visits.get(0).at);scenario.onActivity(a->call(a,"stopConnection"));
         }
     }
     @Test public void tabLimitAndClearingHistoryKeepBookmarksAndOfflinePages()throws Exception{
