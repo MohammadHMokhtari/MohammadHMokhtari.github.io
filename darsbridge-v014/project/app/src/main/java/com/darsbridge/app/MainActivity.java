@@ -177,7 +177,7 @@ public class MainActivity extends Activity {
             TextView t=e.getKey();if(t!=null)t.setTextColor(e.getValue()==1?TEAL:e.getValue()==2?MUTED:INK);
         }
         for(Button b:new ArrayList<>(uiButtons)){
-            if(b!=null){b.setTextColor(INK);b.setBackground(background(ACTION));b.setBackgroundTintList(ColorStateList.valueOf(ACTION));b.setElevation(0);}
+            if(b!=null){b.setTextColor(INK);b.setBackgroundTintList(ColorStateList.valueOf(ACTION));}
         }
         if(address!=null){
             address.setTextColor(INK);address.setHintTextColor(MUTED);
