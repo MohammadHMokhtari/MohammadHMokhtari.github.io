@@ -74,7 +74,7 @@ public class BrowserSessionTest {
     private void local(MainActivity a,int port){field(a,"mode",ConnectionPolicy.Mode.LOCAL);field(a,"socksPort",port);}
     private void open(MainActivity a,String path){call(a,"navigate",new Class<?>[]{String.class},ORIGIN+path);}
     private void loaded(ActivityScenario<MainActivity> scenario,String path)throws Exception{
-        await("page "+path,()->{try{return org.json.JSONObject.quote(path).equals(js(scenario,"window.path"));}catch(Exception e){return false;}});
+        await("page "+path,()->{try{return path.equals(new org.json.JSONTokener(js(scenario,"window.path")).nextValue());}catch(Exception e){return false;}});
         await("history saved",()->new BrowserStore(context()).visits.stream().anyMatch(v->v.url.equals(ORIGIN+path)));
     }
     @Test public void independentTabsKeepDomAndBackStacksAndUseSameProxy()throws Exception{
@@ -134,7 +134,7 @@ public class BrowserSessionTest {
                 scenario.onActivity(a->{fixture(a,requests,posts);open(a,"/form");});loaded(scenario,"/submitted");assertEquals(1,posts.get());
             }
             BrowserStore saved=new BrowserStore(context());assertFalse(saved.find(saved.selected).safeResume);
-            String file=Files.readString(new File(context().getFilesDir(),BrowserStore.FILE_NAME).toPath(),StandardCharsets.UTF_8);
+            String file=new String(Files.readAllBytes(new File(context().getFilesDir(),BrowserStore.FILE_NAME).toPath()),StandardCharsets.UTF_8);
             assertFalse(file.contains("PRIVATE-FORM-BODY"));assertFalse(file.contains("<html"));
             int destinationsBefore=proxy.destinations.get();
             try(ActivityScenario<MainActivity> reopened=ActivityScenario.launch(MainActivity.class)){
@@ -179,7 +179,7 @@ public class BrowserSessionTest {
         assertEquals(pages,new PageStore(context()).read().toString());assertEquals(marks,context().getSharedPreferences(MainActivity.PREFS_NAME,0).getStringSet("marks",Collections.emptySet()));
     }
     @Test public void corruptOrExecutableSessionCannotNavigate()throws Exception{
-        Files.writeString(new File(context().getFilesDir(),BrowserStore.FILE_NAME).toPath(),"{broken",StandardCharsets.UTF_8);
+        Files.write(new File(context().getFilesDir(),BrowserStore.FILE_NAME).toPath(),"{broken".getBytes(StandardCharsets.UTF_8));
         try(ActivityScenario<MainActivity> scenario=ActivityScenario.launch(MainActivity.class)){
             scenario.onActivity(a->{assertTrue(store(a).readFailed);assertEquals(1,store(a).tabs.size());assertNull(web(a).getUrl());assertTrue(web(a).getSettings().getBlockNetworkLoads());});
         }

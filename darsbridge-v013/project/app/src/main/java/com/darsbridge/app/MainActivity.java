@@ -1085,7 +1085,7 @@ public class MainActivity extends Activity {
     private void guide(){
         String message="در نسخهٔ "+displayVersion()+" تب‌های جدا، تاریخچهٔ مرور و یادآوری اتصال اضافه شده است. این نسخه روی ۰.۱۲ نصب می‌شود؛ برای آپدیت، برنامه را حذف نکن.\n\n"+
             "از «تب تازه» بالای صفحه یک جست‌وجوی جدا باز کن. از «تب‌ها» میان صفحه‌ها جابه‌جا شو یا آن‌ها را ببند. تا ۸ تب و ۲۰۰ صفحهٔ اخیر روی گوشی می‌ماند. تاریخچه در خانه و منو است و جست‌وجو و حذف دارد.\n\n"+
-            "پس از آپدیت یک بار اتصال را برقرار کن. با روشن بودن «اتصال مجدد خودکار»، هنگام ورود دوباره مسیر انتخاب‌شده برقرار می‌شود. «قطع اتصال» این یادآوری را خاموش می‌کند تا خودت دوباره وصل شوی. برنامه در پس‌زمینه اتصال تازه‌ای شروع نمی‌کند.\n\n"+
+            "پس از آپدیت یک بار اتصال را برقرار کن. با روشن بودن «اتصال مجدد خودکار»، هنگام ورود دوباره برای برقراری مسیر انتخاب‌شده تلاش می‌شود. «قطع اتصال» این یادآوری را خاموش می‌کند تا خودت دوباره وصل شوی. برنامه در پس‌زمینه اتصال تازه‌ای شروع نمی‌کند.\n\n"+
             "تب‌های ذخیره‌شده با همان آدرس برمی‌گردند؛ پیام‌ها و فرم‌ها ذخیره یا دوباره ارسال نمی‌شوند. برای چت‌های قدیمی، ورود به همان حساب سایت لازم است. تاریخچهٔ نسخه‌های قدیمی که ثبت نشده قابل بازیابی نیست.\n\n"+
             "برای آزمایش معمول، همین چند کار کافی است:\n\n"+
             "۱. اتصال داخلی را بزن و یک سایت یا جست‌وجو را باز کن.\n\n"+
@@ -1198,6 +1198,6 @@ public class MainActivity extends Activity {
         alive=false;connectionWanted=false;routeEpoch++;proxyRoutes.invalidate();stopProbe();ui.removeCallbacksAndMessages(null);worker.shutdownNow();
         if(networkCallback!=null)try{connectivity.unregisterNetworkCallback(networkCallback);}catch(Exception ignored){ }
         embedded.destroy();
-        for(SessionTab tab:tabs)if(tab.view!=null){tab.allowed=false;tab.view.stopLoading();tab.view.destroy();}if(probe!=null)probe.destroy();super.onDestroy();
+        for(SessionTab tab:tabs)if(tab.view!=null){tab.allowed=false;tab.view.stopLoading();pageArea.removeView(tab.view);tab.view.destroy();}if(probe!=null)probe.destroy();super.onDestroy();
     }
 }
