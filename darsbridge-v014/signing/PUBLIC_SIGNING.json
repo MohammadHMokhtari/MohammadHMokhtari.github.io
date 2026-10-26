@@ -1,0 +1,7 @@
+{
+  "application_id": "com.darsbridge.browser",
+  "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "algorithm": "RSA-4096/SHA256withRSA",
+  "created_date_tehran": "2026-10-24",
+  "private_material": "Never stored in repository, CI or APK"
+}

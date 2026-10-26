@@ -1,0 +1,14 @@
+{
+  "version": "0.14.0",
+  "version_code": 14,
+  "stage": "IMPLEMENTED_CI_PENDING",
+  "baseline_code_sha": "ea69620c60d63fd4c725af019c933433fc45a0e1",
+  "baseline_user_feedback": "User screenshot shows 0.13 running Google with 3 tabs and internal route ready; requests link context actions and browser-like appearance",
+  "phone_validation": "pending",
+  "features": [
+    "Long-press context actions for links and images",
+    "Foreground or lazy background tabs preserving source",
+    "Explicit copy/share and native text selection",
+    "Compact browser toolbar and native overflow menu"
+  ]
+}
