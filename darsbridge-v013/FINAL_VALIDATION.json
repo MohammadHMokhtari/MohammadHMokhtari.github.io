@@ -1,0 +1,23 @@
+{
+  "new_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "old_0.12_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "application_id": "com.darsbridge.browser",
+  "version_code": 13,
+  "version": "0.13.0",
+  "code_sha": "ea69620c60d63fd4c725af019c933433fc45a0e1",
+  "ci_run": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40309317299",
+  "tests": 143,
+  "unit": 93,
+  "android": 48,
+  "release_upgrade_stages": 2,
+  "source_archive_files_match": 59,
+  "signed_payload_entries_unchanged": 73,
+  "native_16k_aligned": [
+    "lib/arm64-v8a/libgojni.so",
+    "lib/arm64-v8a/libtor.so"
+  ],
+  "test_private_fixture_absent": true,
+  "apk_sha256": "c6902c14897c59b9b346e5e957fe4ae85227c3b5f6556548f351bcc6cc9801e0",
+  "apk_bytes": 34452564,
+  "phone_validation": "pending user test"
+}

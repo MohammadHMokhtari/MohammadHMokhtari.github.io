@@ -1,0 +1,73 @@
+{
+  "version": "0.13.0",
+  "version_code": 13,
+  "application_id": "com.darsbridge.browser",
+  "debuggable": false,
+  "code_sha": "ea69620c60d63fd4c725af019c933433fc45a0e1",
+  "run_url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40309317299",
+  "unit": {
+    "tests": 93,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android": {
+    "tests": 48,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "release_upgrade_tests": 2,
+  "upgrade_proof": {
+    "before_version_code": 12,
+    "data_sha_before": "ac72c2fa1db52209adca9e839a5d4c3e8514e845e38eb60ce073aaa5b2da1ee0",
+    "cert_sha_before": "24ede62869a764350a9ae8b0075bc64e1a2c6dcc0554a8678cf3ddd2bcb6a88d",
+    "application_id": "com.darsbridge.browser",
+    "after_version_code": 13,
+    "after_version_name": "0.13.0",
+    "data_sha_after": "ac72c2fa1db52209adca9e839a5d4c3e8514e845e38eb60ce073aaa5b2da1ee0",
+    "cert_sha_after": "24ede62869a764350a9ae8b0075bc64e1a2c6dcc0554a8678cf3ddd2bcb6a88d",
+    "non_debuggable": true,
+    "passed": true,
+    "signer_kind": "disposable CI upgrade-test key; not the production release key",
+    "baseline_runtime_unchanged": true,
+    "before_source_sha": "ed3c582b772f98b6f4ab003733fb98666b058bcb",
+    "before_version_name": "0.12.0",
+    "source_upgrade": "tested 0.12 runtime source to new 0.13 source"
+  },
+  "lint": {
+    "debug": {
+      "errors": 0,
+      "warnings": 20
+    },
+    "release": {
+      "errors": 0,
+      "warnings": 20
+    }
+  },
+  "abi": "arm64-v8a",
+  "unsigned_apk_file": "DarsBridge-0.13-unsigned.apk",
+  "unsigned_apk_sha256": "57a2247573be4fec921d4377c893cd17c9595227ffc87f3b737e23a5b169fa8f",
+  "apksigner_jar_sha256": "3716d9311e55d2b0918a2fd9d54ba9e406c5f6abeea700b287f11259bc163dec",
+  "expected_release_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "stage": "SIGNED_RELEASE_VERIFIED_PHONE_TEST_PENDING",
+  "phone_validation": "Pending user installation; 0.12 was reported working over several days; new features still need phone validation",
+  "limits": [
+    "Not Tor Browser; no OS kill switch or universal no-leak guarantee",
+    "Upgrade test uses a disposable CI key on a non-debuggable release variant; production key never enters CI",
+    "Migration from 0.9 requires its local JSON backup; website sessions and route selection are not imported",
+    "Direct IP checks are explicit diagnostics; a TCP or HTTPS response is not a general Internet gateway",
+    "IPv4 candidate ranges are sampled, not exhaustively scanned; browser routing is not changed by a result",
+    "Saved tabs restore URL/title, not page state or chat messages; site account/session controls access",
+    "First explicit connection after upgrading establishes the remembered connection request"
+  ],
+  "apk_sha256": "c6902c14897c59b9b346e5e957fe4ae85227c3b5f6556548f351bcc6cc9801e0",
+  "apk_bytes": 34452564,
+  "signing": {
+    "kind": "persistent private release key",
+    "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "v2_verified": true,
+    "v3_verified": true,
+    "private_key_in_ci": false
+  }
+}
