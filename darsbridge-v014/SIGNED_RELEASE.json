@@ -1,0 +1,76 @@
+{
+  "version": "0.14.0",
+  "version_code": 14,
+  "application_id": "com.darsbridge.browser",
+  "debuggable": false,
+  "code_sha": "db1cc1fe34104340c57175382d90186115675961",
+  "run_url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40356573465",
+  "unit": {
+    "tests": 101,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "android": {
+    "tests": 56,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "release_upgrade_tests": 2,
+  "upgrade_proof": {
+    "browser_sha_before": "f487f1335e2e48e0798a99583d319d682ebea7eb0bba9635dd32bcfd93f1b1b5",
+    "before_version_code": 13,
+    "data_sha_before": "39d6b1148dc61552480220991786b60c0d1394ad06ff865915750998a157e777",
+    "cert_sha_before": "0d0b9765a7d46fde66e482621c7f041d64d0bd232c35ccc9283e5fcaa2867dbe",
+    "application_id": "com.darsbridge.browser",
+    "browser_sha_after": "f487f1335e2e48e0798a99583d319d682ebea7eb0bba9635dd32bcfd93f1b1b5",
+    "tabs_history_and_connection_request_preserved": true,
+    "after_version_code": 14,
+    "after_version_name": "0.14.0",
+    "data_sha_after": "39d6b1148dc61552480220991786b60c0d1394ad06ff865915750998a157e777",
+    "cert_sha_after": "0d0b9765a7d46fde66e482621c7f041d64d0bd232c35ccc9283e5fcaa2867dbe",
+    "non_debuggable": true,
+    "passed": true,
+    "signer_kind": "disposable CI upgrade-test key; not the production release key",
+    "baseline_runtime_unchanged": true,
+    "before_source_sha": "ea69620c60d63fd4c725af019c933433fc45a0e1",
+    "before_version_name": "0.13.0",
+    "source_upgrade": "tested 0.13 runtime source to new 0.14 source"
+  },
+  "lint": {
+    "debug": {
+      "errors": 0,
+      "warnings": 20
+    },
+    "release": {
+      "errors": 0,
+      "warnings": 20
+    }
+  },
+  "abi": "arm64-v8a",
+  "unsigned_apk_file": "DarsBridge-0.14-unsigned.apk",
+  "unsigned_apk_sha256": "51f5a08fd05c4cf0149304c117faae75f472608636546fcc090474dde272c33c",
+  "apksigner_jar_sha256": "3716d9311e55d2b0918a2fd9d54ba9e406c5f6abeea700b287f11259bc163dec",
+  "expected_release_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+  "stage": "SIGNED_RELEASE_VERIFIED_PHONE_TEST_PENDING",
+  "phone_validation": "Pending user installation; 0.13 is visibly running with tabs in the user screenshot; new 0.14 features still need phone validation",
+  "limits": [
+    "Not Tor Browser; no OS kill switch or universal no-leak guarantee",
+    "Upgrade test uses a disposable CI key on a non-debuggable release variant; production key never enters CI",
+    "Migration from 0.9 requires its local JSON backup; website sessions and route selection are not imported",
+    "Direct IP checks are explicit diagnostics; a TCP or HTTPS response is not a general Internet gateway",
+    "IPv4 candidate ranges are sampled, not exhaustively scanned; browser routing is not changed by a result",
+    "Saved tabs restore URL/title, not page state or chat messages; site account/session controls access",
+    "Existing 0.13 connection request is preserved; autoReconnect must be enabled for automatic startup"
+  ],
+  "apk_sha256": "089765244b0429f9ce10743dbb2d83b88ec167680e911811ef199a5f376c5e47",
+  "apk_bytes": 34468948,
+  "signing": {
+    "kind": "persistent private release key",
+    "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "v2_verified": true,
+    "v3_verified": true,
+    "private_key_in_ci": false
+  }
+}

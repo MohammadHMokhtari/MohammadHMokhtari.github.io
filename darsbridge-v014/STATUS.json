@@ -1,14 +1,117 @@
 {
   "version": "0.14.0",
   "version_code": 14,
-  "stage": "IMPLEMENTED_CI_PENDING",
-  "baseline_code_sha": "ea69620c60d63fd4c725af019c933433fc45a0e1",
-  "baseline_user_feedback": "User screenshot shows 0.13 running Google with 3 tabs and internal route ready; requests link context actions and browser-like appearance",
-  "phone_validation": "pending",
+  "stage": "SIGNED_RELEASE_CI_PASS_PHONE_TEST_PENDING",
+  "application_id": "com.darsbridge.browser",
+  "code_sha": "db1cc1fe34104340c57175382d90186115675961",
+  "ci_url": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40356573465",
+  "ci_run": 40356573465,
+  "baseline": {
+    "version": "0.13.0",
+    "runtime_sha": "ea69620c60d63fd4c725af019c933433fc45a0e1",
+    "branch_head_unchanged": "1a77883d720a545e07f17d5b6b95751e0d1c6ae7",
+    "phone_evidence": "User screenshot shows version 0.13 with 3 tabs, Google results and internal route ready; user requests link context actions and browser-like UI"
+  },
+  "tests": {
+    "unit": 101,
+    "android": 56,
+    "upgrade_stages": 2,
+    "total": 159,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "debug": {
+      "errors": 0,
+      "warnings": 20
+    },
+    "release": {
+      "errors": 0,
+      "warnings": 20
+    }
+  },
+  "apk": {
+    "name": "DarsBridge-0.14.apk",
+    "sha256": "089765244b0429f9ce10743dbb2d83b88ec167680e911811ef199a5f376c5e47",
+    "bytes": 34468948,
+    "certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "v2_verified": true,
+    "v3_verified": true,
+    "abi": "arm64-v8a",
+    "debuggable": false
+  },
   "features": [
-    "Long-press context actions for links and images",
-    "Foreground or lazy background tabs preserving source",
-    "Explicit copy/share and native text selection",
-    "Compact browser toolbar and native overflow menu"
+    "Long-press HTTPS link context menu with actual href preview",
+    "Foreground new-tab opening preserves original DOM/search page",
+    "Lazy background tab queue loads only after selection; 8-tab limit retained",
+    "Explicit copy URL, copy bounded link text, share URL through Android chooser",
+    "Native ordinary-text selection preserved; short tap remains in current tab",
+    "Compact plus/tab-count/overflow toolbar and expandable connection details",
+    "System day/night palette retains native button geometry and spacing"
+  ],
+  "upgrade_proof": {
+    "browser_sha_before": "f487f1335e2e48e0798a99583d319d682ebea7eb0bba9635dd32bcfd93f1b1b5",
+    "before_version_code": 13,
+    "data_sha_before": "39d6b1148dc61552480220991786b60c0d1394ad06ff865915750998a157e777",
+    "cert_sha_before": "0d0b9765a7d46fde66e482621c7f041d64d0bd232c35ccc9283e5fcaa2867dbe",
+    "application_id": "com.darsbridge.browser",
+    "browser_sha_after": "f487f1335e2e48e0798a99583d319d682ebea7eb0bba9635dd32bcfd93f1b1b5",
+    "tabs_history_and_connection_request_preserved": true,
+    "after_version_code": 14,
+    "after_version_name": "0.14.0",
+    "data_sha_after": "39d6b1148dc61552480220991786b60c0d1394ad06ff865915750998a157e777",
+    "cert_sha_after": "0d0b9765a7d46fde66e482621c7f041d64d0bd232c35ccc9283e5fcaa2867dbe",
+    "non_debuggable": true,
+    "passed": true,
+    "signer_kind": "disposable CI upgrade-test key; not the production release key",
+    "baseline_runtime_unchanged": true,
+    "before_source_sha": "ea69620c60d63fd4c725af019c933433fc45a0e1",
+    "before_version_name": "0.13.0",
+    "source_upgrade": "tested 0.13 runtime source to new 0.14 source"
+  },
+  "verification": {
+    "new_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "old_0.13_certificate_sha256": "e08438502f55d4e8b0c7193e37f73e04bb3f65e90fb2003b1b9dfbc1720c18ef",
+    "application_id": "com.darsbridge.browser",
+    "version_code": 14,
+    "version": "0.14.0",
+    "code_sha": "db1cc1fe34104340c57175382d90186115675961",
+    "ci_run": "https://github.com/MohammadHMokhtari/MohammadHMokhtari.github.io/actions/runs/40356573465",
+    "tests": 159,
+    "unit": 101,
+    "android": 56,
+    "release_upgrade_stages": 2,
+    "source_archive_files_match": 62,
+    "signed_payload_entries_unchanged": 73,
+    "native_16k_aligned": [
+      "lib/arm64-v8a/libgojni.so",
+      "lib/arm64-v8a/libtor.so"
+    ],
+    "test_private_fixture_absent": true,
+    "apk_sha256": "089765244b0429f9ce10743dbb2d83b88ec167680e911811ef199a5f376c5e47",
+    "apk_bytes": 34468948,
+    "phone_validation": "pending user test"
+  },
+  "data_files": {
+    "prefs": "darsbridge",
+    "browser": "browser-v013.json",
+    "library": "reading-v03.json",
+    "all_unchanged": true
+  },
+  "limits": [
+    "Not full Chrome/Opera/Tor Browser feature or protection parity",
+    "Automatic web popup windows remain disabled; new tab action is explicit context-menu choice",
+    "Background page is fetched only on selection",
+    "Context URLs limited to HTTPS; no executable/local/external schemes",
+    "Website cookies/session shared as before; no page HTML, draft or form body restored",
+    "IP scanner stays discovery only and does not become a browser gateway"
+  ],
+  "phone_validation": "PENDING 0.14 user installation",
+  "next_test": [
+    "Update in place without uninstalling",
+    "Long-press Google result and open in new tab; check source tab remains",
+    "Try add-to-background, copy link and ordinary-text selection",
+    "Use plus, overflow menu and connection arrow; verify current bookmarks/history remain"
   ]
 }
