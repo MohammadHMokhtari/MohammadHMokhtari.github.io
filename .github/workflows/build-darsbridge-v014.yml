@@ -70,6 +70,7 @@ jobs:
             adb pull /sdcard/Download/DarsBridge-tabs.png build-output/tabs.png
             adb pull /sdcard/Download/DarsBridge-link-menu.png build-output/link-menu.png
             adb pull /sdcard/Download/DarsBridge-toolbar.png build-output/toolbar.png
+            adb pull /sdcard/Download/DarsBridge-selection.png build-output/selection.png
             adb pull /sdcard/Download/DarsBridge-history.png build-output/history.png
             adb pull /sdcard/Download/DarsBridge-help.png build-output/help.png
             adb pull /sdcard/Download/DarsBridge-status.png build-output/status.png
@@ -144,6 +145,7 @@ jobs:
             build-output/RELEASE_INPUT.json
             build-output/CI_REPORT_FA.md
             build-output/link-menu.png
+            build-output/selection.png
             build-output/toolbar.png
             build-output/tabs.png
             build-output/history.png

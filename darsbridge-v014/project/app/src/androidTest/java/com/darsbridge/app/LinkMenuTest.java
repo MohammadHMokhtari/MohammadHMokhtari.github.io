@@ -51,7 +51,7 @@ public class LinkMenuTest {
                 String png="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=";
                 String html="<html><head><meta name='viewport' content='width=device-width,initial-scale=1'><title>نتایج جست‌وجوی آزمایشی</title><style>body{font:20px sans-serif;padding:12px}a{display:block;padding:16px;margin:8px 0}img{width:160px;height:60px;background:#cfe7df}#selection{padding:20px 4px;user-select:text}</style></head><body>"+
                     "<a id='plain' href='"+TARGET+"'>نتیجهٔ آزمایشی</a><a id='image' href='"+IMAGE_TARGET+"'><img id='thumb' alt='پیوند تصویر' src='"+png+"'></a>"+
-                    "<p id='selection'>Selectable ordinary text for copying</p><input id='draft' value='keep-source'><script>window.fixture=true</script></body></html>";
+                    "<p id='selection'><span id='word'>Selectable</span> ordinary text for copying</p><input id='draft' value='keep-source'><script>window.fixture=true</script></body></html>";
                 return new WebResourceResponse("text/html","UTF-8",200,"OK",Collections.singletonMap("Cache-Control","no-store"),new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
             }
             @Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){return real.shouldOverrideUrlLoading(v,r);}
@@ -119,8 +119,10 @@ public class LinkMenuTest {
     }
     @Test public void ordinaryTextRetainsNativeSelection()throws Exception{
         try(NetworkSafetyTest.Socks proxy=new NetworkSafetyTest.Socks();ActivityScenario<MainActivity> scenario=ActivityScenario.launch(MainActivity.class)){
-            scenario.onActivity(a->fixture(a,proxy.port()));loaded(scenario);touch(scenario,"selection",true);
+            scenario.onActivity(a->fixture(a,proxy.port()));loaded(scenario);touch(scenario,"word",true);
+            scenario.onActivity(a->android.util.Log.i("DarsBridgeSelectionTest","Native hit type="+web(a).getHitTestResult().getType()));
             await("native text selection",()->{try{Object value=new JSONTokener(js(scenario,"window.getSelection().toString()" )).nextValue();return value instanceof String && !((String)value).isEmpty();}catch(Exception e){return false;}});
+            device().executeShellCommand("screencap -p /sdcard/Download/DarsBridge-selection.png");
             scenario.onActivity(a->{assertNull(field(a,"linkDialog"));assertEquals(1,store(a).tabs.size());call(a,"stopConnection");});
         }
     }
